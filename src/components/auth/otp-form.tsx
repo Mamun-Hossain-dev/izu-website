@@ -38,7 +38,7 @@ export function OtpForm() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (digits.every(Boolean)) router.push("/change-password");
+    if (digits.every(Boolean)) router.push("/reset-password");
   }
 
   return (
