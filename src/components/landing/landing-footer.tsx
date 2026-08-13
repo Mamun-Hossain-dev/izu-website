@@ -5,15 +5,15 @@ import Link from "next/link";
 const footerLinks = [
   { label: "Home", href: "/#home" },
   { label: "Categories", href: "/categories" },
-  { label: "Service", href: "/#services" },
+  { label: "About Us", href: "/about-us" },
   { label: "Booking", href: "/#how-it-works" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Contact", href: "/contact-us" },
 ];
 
 const services = [
   { label: "Cleaning", href: "/services/cleaning" },
-  { label: "Plumbing", href: "/categories" },
-  { label: "Electrical", href: "/categories" },
+  { label: "Plumbing", href: "/services/plumbing" },
+  { label: "Electrical", href: "/services/electrical" },
   { label: "View All", href: "/categories" },
 ];
 
@@ -46,7 +46,13 @@ export function LandingFooter() {
             </address>
           </div>
         </div>
-        <div className="mt-8 border-t border-white/70 pt-4 text-center text-sm">© 2025 workyapa. All rights reserved.</div>
+        <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-white/70 pt-4 text-sm sm:flex-row">
+          <span>© 2025 workyapa. All rights reserved.</span>
+          <div className="flex gap-5">
+            <Link href="/privacy-policy" className="hover:underline">Privacy Policy</Link>
+            <Link href="/terms-and-conditions" className="hover:underline">Terms &amp; Conditions</Link>
+          </div>
+        </div>
       </div>
     </footer>
   );
