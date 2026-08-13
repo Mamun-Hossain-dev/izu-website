@@ -1,14 +1,15 @@
 "use client";
 
-import { Bot, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRef } from "react";
 
 const services = [
-  { title: "Plumbing", image: "/images/service-plumbing.jpg" },
-  { title: "Electrical", image: "/images/service-electrical.jpg" },
-  { title: "Carpentry", image: "/images/service-carpentry.jpg" },
-  { title: "Cleaning", image: "/images/service-cleaning.jpg" },
+  { title: "Plumbing", image: "/images/service-plumbing.jpg", href: "/services/plumbing" },
+  { title: "Electrical", image: "/images/service-electrical.jpg", href: "/services/electrical" },
+  { title: "Carpentry", image: "/images/service-carpentry.jpg", href: "/services/carpentry" },
+  { title: "Cleaning", image: "/images/service-cleaning.jpg", href: "/services/cleaning" },
 ];
 
 export function ServicesSection() {
@@ -32,12 +33,12 @@ export function ServicesSection() {
         className="container mt-9 flex snap-x gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {services.map((service) => (
-          <article key={service.title} className="w-[290px] shrink-0 snap-start overflow-hidden rounded-xl bg-[#f1f1f1] sm:w-[340px]">
+          <Link key={service.title} href={service.href} className="group w-[290px] shrink-0 snap-start overflow-hidden rounded-xl bg-[#f1f1f1] sm:w-[340px]">
             <div className="relative h-[220px] sm:h-[250px]">
-              <Image src={service.image} alt={`${service.title} service`} fill sizes="340px" className="object-cover" />
+              <Image src={service.image} alt={`${service.title} service`} fill sizes="340px" className="object-cover transition duration-300 group-hover:scale-105" />
             </div>
             <h3 className="py-5 text-center text-[26px] font-bold text-[#383f44]">{service.title}</h3>
-          </article>
+          </Link>
         ))}
       </div>
 
@@ -52,13 +53,6 @@ export function ServicesSection() {
           <ChevronRight className="size-5" />
         </button>
       </div>
-      <button
-        type="button"
-        aria-label="Open support chat"
-        className="absolute bottom-3 right-5 grid size-16 place-items-center rounded-[22px] border-2 border-[#a8a8a8] bg-white text-[#2c76b9] shadow-sm transition hover:-translate-y-1 sm:right-12 sm:size-20"
-      >
-        <Bot className="size-9 sm:size-11" strokeWidth={2.3} />
-      </button>
     </section>
   );
 }

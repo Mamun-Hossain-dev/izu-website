@@ -3,17 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 const links = [
-  { label: "Home", href: "#home" },
-  { label: "Categories", href: "#services" },
-  { label: "Booking", href: "#how-it-works" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/#home", key: "home" },
+  { label: "Categories", href: "/categories", key: "categories" },
+  { label: "Booking", href: "/#how-it-works", key: "booking" },
+  { label: "Contact", href: "/#contact", key: "contact" },
 ];
 
-export function LandingHeader() {
+export function LandingHeader({ active = "home" }: { active?: string }) {
   return (
-    <header className="relative z-30 h-[54px] bg-white shadow-sm">
+    <header className="fixed inset-x-0 top-0 z-50 h-16 bg-white shadow-sm">
       <div className="container flex h-full items-center justify-between">
-        <Link href="#home" aria-label="Workyapa home">
+        <Link href="/#home" aria-label="Workyapa home">
           <Image
             src="/images/workyapa-logo.png"
             alt="Workyapa"
@@ -25,11 +25,11 @@ export function LandingHeader() {
         </Link>
 
         <nav aria-label="Main navigation" className="hidden items-center gap-8 text-base md:flex">
-          {links.map((link, index) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={index === 0 ? "font-bold text-[#2674b7]" : "text-[#171717] transition hover:text-[#2674b7]"}
+              className={link.key === active ? "font-bold text-[#2674b7]" : "text-[#171717] transition hover:text-[#2674b7]"}
             >
               {link.label}
             </Link>
@@ -53,7 +53,15 @@ export function LandingHeader() {
             <Menu />
           </summary>
           <nav className="absolute right-0 top-12 flex w-52 flex-col rounded-lg border bg-white p-2 shadow-lg">
-            {links.map((link) => <Link key={link.href} href={link.href} className="rounded px-4 py-3 hover:bg-[#eff7fd]">{link.label}</Link>)}
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={link.key === active ? "rounded bg-[#eff7fd] px-4 py-3 font-bold text-[#2674b7]" : "rounded px-4 py-3 hover:bg-[#eff7fd]"}
+              >
+                {link.label}
+              </Link>
+            ))}
             <Link href="/login" className="mt-1 rounded bg-[#2a73b5] px-4 py-3 text-center text-white">Sign in</Link>
           </nav>
         </details>

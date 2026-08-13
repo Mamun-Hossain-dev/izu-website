@@ -19,7 +19,7 @@ const achievements = [
   { value: "100+", label: "Good Reviews" },
 ];
 
-export function TrustAndAchievements() {
+export function TrustAndAchievements({ showAchievements = true }: { showAchievements?: boolean }) {
   return (
     <>
       <section className="bg-[#f8f8f8] py-14 sm:py-16">
@@ -46,19 +46,21 @@ export function TrustAndAchievements() {
         </div>
       </section>
 
-      <section className="relative mx-auto aspect-[1922/363] min-h-[300px] max-h-[363px] max-w-[1922px] overflow-hidden text-white">
-        <Image src="/images/achivements.jpg" alt="" fill sizes="100vw" className="object-cover" />
-        <div className="absolute inset-0 bg-[#4fa8e8]/45" />
-        <div className="container relative grid h-full grid-cols-2 items-center gap-8 text-center md:grid-cols-4">
-          <h2 className="text-3xl font-normal sm:text-4xl">Achievement</h2>
-          {achievements.map((item) => (
-            <div key={item.label}>
-              <strong className="block text-4xl font-bold">{item.value}</strong>
-              <span className="text-xl sm:text-2xl">{item.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      {showAchievements && (
+        <section className="relative mx-auto aspect-[1922/363] min-h-[300px] max-h-[363px] max-w-[1922px] overflow-hidden text-white">
+          <Image src="/images/achivements.jpg" alt="" fill sizes="100vw" className="object-cover" />
+          <div className="absolute inset-0 bg-[#62b6ed]/40" />
+          <div className="container relative grid h-full grid-cols-2 items-center gap-8 text-center md:grid-cols-4">
+            <h2 className="text-3xl font-normal sm:text-4xl">Achievement</h2>
+            {achievements.map((item) => (
+              <div key={item.label}>
+                <strong className="block text-4xl font-bold">{item.value}</strong>
+                <span className="text-xl sm:text-2xl">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }

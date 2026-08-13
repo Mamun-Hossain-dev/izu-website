@@ -41,6 +41,26 @@ const testimonials = [
     name: "Ava Thompson",
     review: "Professional service from beginning to end. The team kept me updated, respected my home, and completed the work to a very high standard. I would book again.",
   },
+  {
+    name: "Ethan Walker",
+    review: "The booking process was quick and the service provider arrived exactly when expected. The repair was completed carefully, with clear updates throughout the visit.",
+  },
+  {
+    name: "Mia Robinson",
+    review: "I needed help at short notice and the team responded immediately. The professional was polite, knowledgeable, and completed everything without disrupting our day.",
+  },
+  {
+    name: "Lucas Martin",
+    review: "Excellent communication and dependable workmanship. The price matched the original estimate, the job was finished promptly, and the final result looks fantastic.",
+  },
+  {
+    name: "Isabella Clark",
+    review: "The entire experience was smooth and reassuring. It was easy to choose a service, schedule a convenient time, and follow the progress from start to finish.",
+  },
+  {
+    name: "Henry Lewis",
+    review: "A trustworthy and professional service. The technician diagnosed the issue quickly, explained the solution clearly, and made sure everything worked before leaving.",
+  },
 ];
 
 export function TestimonialsSection() {
