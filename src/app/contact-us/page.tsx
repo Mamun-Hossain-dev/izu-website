@@ -1,10 +1,14 @@
 import React from 'react'
 import ContactUsContainer from './_components/contact-us-container'
+import { LandingFooter } from '@/components/landing/landing-footer'
+import { LandingHeader } from '@/components/landing/landing-header'
 
 const ContactUsPage = () => {
   return (
-    <div>
+    <div className="pt-16">
+      <LandingHeader active="contact" />
       <ContactUsContainer/>
+      <LandingFooter />
     </div>
   )
 }

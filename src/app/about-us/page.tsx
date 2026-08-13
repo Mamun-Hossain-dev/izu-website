@@ -1,16 +1,18 @@
-import React from "react";
-import AboutUsContainer from "./_components/about-us-container";
-import { AppDownloadAndFooter } from "@/components/landing/app-download-and-footer";
-import { LandingHeader } from "@/components/landing/landing-header";
+import React from 'react'
+import AboutUsContainer from './_components/about-us-container'
+// import { AppDownloadSection } from '@/components/landing/app-download-section'
+import { LandingFooter } from '@/components/landing/landing-footer'
+import { LandingHeader } from '@/components/landing/landing-header'
 
 const AboutUsPage = () => {
   return (
-    <div>
-      <LandingHeader />
+    <div className="pt-16">
+      <LandingHeader active="about" />
       <AboutUsContainer />
-      <AppDownloadAndFooter />
+      {/* <AppDownloadSection /> */}
+      <LandingFooter />
     </div>
-  );
-};
+  )
+}
 
-export default AboutUsPage;
+export default AboutUsPage

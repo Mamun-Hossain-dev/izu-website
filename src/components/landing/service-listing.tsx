@@ -99,7 +99,7 @@ function ServiceCard({ service, index }: { service: ServiceSlug; index: number }
           <span>$&nbsp; {details.price}/hr</span>
         </div>
 
-        <Link href="#" className="mt-4 flex h-12 items-center justify-center rounded-full bg-[#2d76b9] text-lg font-medium text-white transition hover:bg-[#205f96]">
+        <Link href={`/services/${service}/details`} className="mt-4 flex h-12 items-center justify-center rounded-full bg-[#2d76b9] text-lg font-medium text-white transition hover:bg-[#205f96]">
           View
         </Link>
       </div>

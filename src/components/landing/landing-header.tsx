@@ -6,7 +6,8 @@ const links = [
   { label: "Home", href: "/#home", key: "home" },
   { label: "Categories", href: "/categories", key: "categories" },
   { label: "Booking", href: "/#how-it-works", key: "booking" },
-  { label: "Contact", href: "/#contact", key: "contact" },
+  { label: "About Us", href: "/about-us", key: "about" },
+  { label: "Contact", href: "/contact-us", key: "contact" },
 ];
 
 export function LandingHeader({ active = "home" }: { active?: string }) {
@@ -24,7 +25,7 @@ export function LandingHeader({ active = "home" }: { active?: string }) {
           />
         </Link>
 
-        <nav aria-label="Main navigation" className="hidden items-center gap-8 text-base md:flex">
+        <nav aria-label="Main navigation" className="hidden items-center gap-6 text-base md:flex">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -37,12 +38,12 @@ export function LandingHeader({ active = "home" }: { active?: string }) {
         </nav>
 
         <div className="hidden items-center gap-5 md:flex">
-          <button type="button" aria-label="Search" className="transition hover:text-[#2674b7]">
+          <Link href="/categories" aria-label="Search services" className="transition hover:text-[#2674b7]">
             <Search className="size-5" />
-          </button>
-          <button type="button" aria-label="Messages" className="transition hover:text-[#2674b7]">
+          </Link>
+          <Link href="/contact-us" aria-label="Contact support" className="transition hover:text-[#2674b7]">
             <MessageCircleMore className="size-5" />
-          </button>
+          </Link>
           <Link href="/login" className="rounded-md bg-[#2a73b5] px-5 py-2 text-base font-medium text-white transition hover:bg-[#205f96]">
             Sign in
           </Link>
