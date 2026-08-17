@@ -1,28 +1,30 @@
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
+    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5008/api/v1",
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-// Adding interceptors (e.g. for attaching auth tokens dynamically if needed)
+// Attach the access token from the persisted auth store to every request.
 axiosInstance.interceptors.request.use(
     (config) => {
-        // You can attach tokens from session here if needed
+        if (typeof window !== "undefined") {
+            try {
+                const raw = window.localStorage.getItem("izu-auth");
+                if (raw) {
+                    const { state } = JSON.parse(raw) as {
+                        state?: { user?: { accessToken?: string } };
+                    };
+                    const token = state?.user?.accessToken;
+                    if (token) config.headers.Authorization = `Bearer ${token}`;
+                }
+            } catch {
+                // Ignore malformed or unavailable storage.
+            }
+        }
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
-
-axiosInstance.interceptors.response.use(
-    (response) => {
-        return response;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );

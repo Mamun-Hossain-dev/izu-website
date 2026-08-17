@@ -23,7 +23,7 @@ export function LandingFooter() {
       <div className="container">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.25fr_1fr_1fr_1.25fr]">
           <div className="self-start">
-            <Image src="/images/workyapa-logo.png" alt="Workyapa" width={155} height={50} className="h-auto w-[155px]" />
+            <Image src="/images/footer-logo.png" alt="Footer Logo" width={155} height={50} className="h-auto w-[155px]" />
           </div>
           <div>
             <h3 className="mb-4 font-medium">Quick Links</h3>

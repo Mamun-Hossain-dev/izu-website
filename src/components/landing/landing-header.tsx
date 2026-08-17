@@ -1,11 +1,12 @@
 import { Menu, MessageCircleMore, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { UserMenu } from "@/components/shared/UserMenu";
 
 const links = [
   { label: "Home", href: "/#home", key: "home" },
   { label: "Categories", href: "/categories", key: "categories" },
-  { label: "Booking", href: "/#how-it-works", key: "booking" },
+  { label: "Booking", href: "/bookings", key: "booking" },
   { label: "About Us", href: "/about-us", key: "about" },
   { label: "Contact", href: "/contact-us", key: "contact" },
 ];
@@ -44,9 +45,7 @@ export function LandingHeader({ active = "home" }: { active?: string }) {
           <Link href="/message" aria-label="Contact support" className="transition hover:text-[#2674b7]">
             <MessageCircleMore className="size-5" />
           </Link>
-          <Link href="/login" className="rounded-md bg-[#2a73b5] px-5 py-2 text-base font-medium text-white transition hover:bg-[#205f96]">
-            Sign in
-          </Link>
+          <UserMenu />
         </div>
 
         <details className="group relative md:hidden">
@@ -63,7 +62,7 @@ export function LandingHeader({ active = "home" }: { active?: string }) {
                 {link.label}
               </Link>
             ))}
-            <Link href="/login" className="mt-1 rounded bg-[#2a73b5] px-4 py-3 text-center text-white">Sign in</Link>
+            <UserMenu variant="mobile" />
           </nav>
         </details>
       </div>

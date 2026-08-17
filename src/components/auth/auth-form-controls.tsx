@@ -6,9 +6,10 @@ import { useState } from "react";
 type AuthFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label: string;
   id: string;
+  error?: string;
 };
 
-export function AuthField({ label, id, type = "text", ...props }: AuthFieldProps) {
+export function AuthField({ label, id, type = "text", error, ...props }: AuthFieldProps) {
   const [visible, setVisible] = useState(false);
   const isPassword = type === "password";
 
@@ -21,7 +22,12 @@ export function AuthField({ label, id, type = "text", ...props }: AuthFieldProps
         <input
           id={id}
           type={isPassword && visible ? "text" : type}
-          className="h-11 w-full rounded-full border border-[#aebbc3] bg-transparent px-4 text-sm text-[#24343e] outline-none transition placeholder:text-[#b4bdc3] focus:border-[#2875bb] focus:ring-2 focus:ring-[#2875bb]/15"
+          className={`h-11 w-full rounded-full border bg-transparent px-4 text-sm text-[#24343e] outline-none transition placeholder:text-[#b4bdc3] focus:ring-2 ${
+            error
+              ? "border-red-400 focus:border-red-400 focus:ring-red-400/15"
+              : "border-[#aebbc3] focus:border-[#2875bb] focus:ring-[#2875bb]/15"
+          }`}
+          aria-invalid={error ? true : undefined}
           {...props}
         />
         {isPassword ? (
@@ -35,6 +41,11 @@ export function AuthField({ label, id, type = "text", ...props }: AuthFieldProps
           </button>
         ) : null}
       </div>
+      {error ? (
+        <p role="alert" className="text-xs font-medium text-red-600">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
