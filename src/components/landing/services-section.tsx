@@ -1,19 +1,35 @@
 "use client";
 
+import { getCategories } from "@/services/catalog-api";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CatalogEmpty, CatalogError } from "@/components/landing/catalog-states";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 
-const services = [
-  { title: "Plumbing", image: "/images/service-plumbing.jpg", href: "/services/plumbing" },
-  { title: "Electrical", image: "/images/service-electrical.jpg", href: "/services/electrical" },
-  { title: "Carpentry", image: "/images/service-carpentry.jpg", href: "/services/carpentry" },
-  { title: "Cleaning", image: "/images/service-cleaning.jpg", href: "/services/cleaning" },
-];
+function ServicesSectionSkeleton() {
+  return (
+    <div className="container mt-9 flex gap-4 overflow-hidden">
+      {Array.from({ length: 4 }, (_, index) => (
+        <div key={index} className="w-[290px] shrink-0 overflow-hidden rounded-xl bg-[#f1f1f1] sm:w-[340px]">
+          <Skeleton className="h-[220px] w-full rounded-none sm:h-[250px]" />
+          <div className="px-5 py-5">
+            <Skeleton className="mx-auto h-6 w-28" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function ServicesSection() {
   const track = useRef<HTMLDivElement>(null);
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
 
   function scroll(direction: number) {
     track.current?.scrollBy({ left: direction * 360, behavior: "smooth" });
@@ -28,19 +44,40 @@ export function ServicesSection() {
         </p>
       </div>
 
-      <div
-        ref={track}
-        className="container mt-9 flex snap-x gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {services.map((service) => (
-          <Link key={service.title} href={service.href} className="group w-[290px] shrink-0 snap-start overflow-hidden rounded-xl bg-[#f1f1f1] sm:w-[340px]">
-            <div className="relative h-[220px] sm:h-[250px]">
-              <Image src={service.image} alt={`${service.title} service`} fill sizes="340px" className="object-cover transition duration-300 group-hover:scale-105" />
-            </div>
-            <h3 className="py-5 text-center text-[26px] font-bold text-[#383f44]">{service.title}</h3>
-          </Link>
-        ))}
-      </div>
+      {isLoading ? (
+        <ServicesSectionSkeleton />
+      ) : isError ? (
+        <CatalogError error={error} onRetry={() => refetch()} />
+      ) : !data || data.length === 0 ? (
+        <CatalogEmpty
+          title="No services available"
+          description="Service categories will appear here once they are added."
+        />
+      ) : (
+        <div
+          ref={track}
+          className="container mt-9 flex snap-x gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {data.map((category) => (
+            <Link
+              key={category._id}
+              href={`/services/${category._id}`}
+              className="group w-[290px] shrink-0 snap-start overflow-hidden rounded-xl bg-[#f1f1f1] sm:w-[340px]"
+            >
+              <div className="relative h-[220px] sm:h-[250px]">
+                <Image
+                  src={category.catImage}
+                  alt={`${category.name} service`}
+                  fill
+                  sizes="340px"
+                  className="object-cover transition duration-300 group-hover:scale-105"
+                />
+              </div>
+              <h3 className="py-5 text-center text-[26px] font-bold text-[#383f44]">{category.name.trim()}</h3>
+            </Link>
+          ))}
+        </div>
+      )}
 
       <div className="mt-10 flex items-center justify-center gap-5">
         <button onClick={() => scroll(-1)} aria-label="Previous services" className="grid size-8 place-items-center rounded-full bg-[#f0f1f1] text-[#b7b7b7] hover:text-[#2877bb]">

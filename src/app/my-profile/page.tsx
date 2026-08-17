@@ -1,7 +1,7 @@
-import React from "react";
-import MyProfileContainer from "./_components/my-profile-container";
-import { LandingHeader } from "@/components/landing/landing-header";
-import { LandingFooter } from "@/components/landing/landing-footer";
+import React from 'react'
+import MyProfileContainer from './_components/my-profile-container'
+import { LandingHeader } from '@/components/landing/landing-header'
+import { LandingFooter } from '@/components/landing/landing-footer'
 
 const MyProfilePage = () => {
   return (
@@ -10,7 +10,7 @@ const MyProfilePage = () => {
       <MyProfileContainer />
       <LandingFooter />
     </div>
-  );
-};
+  )
+}
 
-export default MyProfilePage;
+export default MyProfilePage

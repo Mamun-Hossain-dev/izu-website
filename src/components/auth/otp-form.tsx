@@ -1,16 +1,23 @@
 "use client";
 
 import { AuthSubmitButton } from "@/components/auth/auth-form-controls";
-import { useRouter } from "next/navigation";
+import { getApiErrorMessage } from "@/lib/api-error";
+import { forgotPassword, verifyOtp } from "@/services/auth-api";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ClipboardEvent, FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 const OTP_LENGTH = 6;
 
 export function OtpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") ?? "";
   const inputs = useRef<Array<HTMLInputElement | null>>([]);
   const [digits, setDigits] = useState(Array(OTP_LENGTH).fill(""));
   const [seconds, setSeconds] = useState(59);
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     if (seconds <= 0) return;
@@ -18,7 +25,32 @@ export function OtpForm() {
     return () => window.clearTimeout(timer);
   }, [seconds]);
 
+  const verifyMutation = useMutation({
+    mutationFn: (otp: string) => verifyOtp({ email, otp }),
+    onSuccess: (result, otp) => {
+      toast.success(result.message || "OTP verified successfully.");
+      router.push(`/reset-password?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`);
+    },
+    onError: (error) => {
+      setFormError("");
+      toast.error(getApiErrorMessage(error, "Invalid or expired OTP. Please try again."));
+    },
+  });
+
+  const resendMutation = useMutation({
+    mutationFn: () => forgotPassword({ email }),
+    onSuccess: (result) => {
+      setDigits(Array(OTP_LENGTH).fill(""));
+      setFormError("");
+      setSeconds(59);
+      toast.success(result.message || "A new OTP has been sent to your email.");
+    },
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Unable to resend the OTP. Please try again.")),
+  });
+
   function updateDigit(index: number, value: string) {
+    setFormError("");
     const digit = value.replace(/\D/g, "").slice(-1);
     setDigits((current) => current.map((item, itemIndex) => itemIndex === index ? digit : item));
     if (digit && index < OTP_LENGTH - 1) inputs.current[index + 1]?.focus();
@@ -33,16 +65,28 @@ export function OtpForm() {
     if (!pasted) return;
     event.preventDefault();
     setDigits(Array.from({ length: OTP_LENGTH }, (_, index) => pasted[index] ?? ""));
+    setFormError("");
     inputs.current[Math.min(pasted.length, OTP_LENGTH) - 1]?.focus();
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (digits.every(Boolean)) router.push("/reset-password");
+
+    if (!email) {
+      toast.error("Missing email address. Please start the recovery again.");
+      router.replace("/forgot-password");
+      return;
+    }
+    if (!digits.every(Boolean)) {
+      setFormError("Please enter the complete 6-digit code.");
+      return;
+    }
+
+    verifyMutation.mutate(digits.join(""));
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} noValidate className="space-y-5">
       <div className="flex justify-between gap-2" onPaste={handlePaste}>
         {digits.map((digit, index) => (
           <input
@@ -54,27 +98,43 @@ export function OtpForm() {
             inputMode="numeric"
             autoComplete={index === 0 ? "one-time-code" : "off"}
             maxLength={1}
-            required
             aria-label={`OTP digit ${index + 1}`}
-            className="aspect-square min-w-0 flex-1 rounded border border-[#c9d6dd] bg-transparent text-center text-lg font-semibold text-[#2875bb] outline-none focus:border-[#2875bb] focus:ring-2 focus:ring-[#2875bb]/15"
+            aria-invalid={formError ? true : undefined}
+            className={`aspect-square min-w-0 flex-1 rounded border bg-transparent text-center text-lg font-semibold text-[#2875bb] outline-none focus:ring-2 ${
+              formError
+                ? "border-red-400 focus:border-red-400 focus:ring-red-400/15"
+                : "border-[#c9d6dd] focus:border-[#2875bb] focus:ring-[#2875bb]/15"
+            }`}
           />
         ))}
       </div>
+      {formError ? (
+        <p role="alert" className="text-xs font-medium text-red-600">
+          {formError}
+        </p>
+      ) : null}
       <div className="flex items-center justify-between text-xs text-[#68747d]">
         <span aria-live="polite">◷ 00:{String(seconds).padStart(2, "0")}</span>
         <span>
           Didn&apos;t get a code?{" "}
           <button
             type="button"
-            disabled={seconds > 0}
-            onClick={() => setSeconds(59)}
+            disabled={seconds > 0 || resendMutation.isPending}
+            onClick={() => {
+              if (!email) {
+                toast.error("Missing email address. Please start the recovery again.");
+                router.replace("/forgot-password");
+                return;
+              }
+              resendMutation.mutate();
+            }}
             className="font-semibold text-[#176bb3] hover:underline disabled:cursor-not-allowed disabled:text-[#8da5b5]"
           >
-            Resend
+            {resendMutation.isPending ? "Sending..." : "Resend"}
           </button>
         </span>
       </div>
-      <AuthSubmitButton>Verify</AuthSubmitButton>
+      <AuthSubmitButton pending={verifyMutation.isPending}>Verify</AuthSubmitButton>
     </form>
   );
 }

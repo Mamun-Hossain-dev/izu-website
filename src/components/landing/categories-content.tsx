@@ -1,43 +1,11 @@
-import Image from 'next/image'
-import Link from 'next/link'
+"use client";
 
-const categories = [
-  {
-    title: 'Cleaning',
-    image: '/images/category-cleaning.jpg',
-    href: '/services/cleaning',
-  },
-  {
-    title: 'Plumbing',
-    image: '/images/category-plumbing.jpg',
-    href: '/services/plumbing',
-  },
-  {
-    title: 'Electrical',
-    image: '/images/category-electrical.jpg',
-    href: '/services/electrical',
-  },
-  {
-    title: 'Carpentry',
-    image: '/images/category-carpentry.jpg',
-    href: '/services/carpentry',
-  },
-  {
-    title: 'Painting',
-    image: '/images/category-painting.jpg',
-    href: '/services/painting',
-  },
-  {
-    title: 'Interior',
-    image: '/images/service-cleaning.jpg',
-    href: '/services/interior',
-  },
-  {
-    title: 'Construction',
-    image: '/images/category-construction.jpg',
-    href: '/services/construction',
-  },
-]
+import { getCategories } from "@/services/catalog-api";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CatalogEmpty, CatalogError } from "@/components/landing/catalog-states";
+import Image from "next/image";
+import Link from "next/link";
 
 export function CategoriesHero() {
   return (
@@ -61,10 +29,30 @@ export function CategoriesHero() {
         </p>
       </div>
     </section>
-  )
+  );
+}
+
+function CategoryGridSkeleton() {
+  return (
+    <div className="mx-auto mt-10 grid max-w-[1160px] gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }, (_, index) => (
+        <div key={index} className="overflow-hidden rounded-xl bg-[#f1f1f1]">
+          <Skeleton className="h-[230px] w-full rounded-none sm:h-[250px]" />
+          <div className="px-5 py-5">
+            <Skeleton className="mx-auto h-6 w-32" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function CategoriesGrid() {
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
+
   return (
     <section id="services" className="scroll-mt-20 bg-white py-14 sm:py-20">
       <div className="container mx-auto px-4">
@@ -78,29 +66,40 @@ export function CategoriesGrid() {
           </p>
         </div>
 
-        <div className="mx-auto mt-10 grid max-w-[1160px] gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map(category => (
-            <Link
-              key={category.title}
-              href={category.href}
-              className="group overflow-hidden rounded-xl bg-[#f1f1f1]"
-            >
-              <div className="relative h-[230px] sm:h-[250px]">
-                <Image
-                  src={category.image}
-                  alt={`${category.title} service`}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
-                  className="object-cover transition duration-300 group-hover:scale-105"
-                />
-              </div>
-              <h3 className="py-5 text-center text-2xl font-bold text-[#383f44]">
-                {category.title}
-              </h3>
-            </Link>
-          ))}
-        </div>
+        {isLoading ? (
+          <CategoryGridSkeleton />
+        ) : isError ? (
+          <CatalogError error={error} onRetry={() => refetch()} />
+        ) : !data || data.length === 0 ? (
+          <CatalogEmpty
+            title="No categories found"
+            description="Categories will appear here once they are added."
+          />
+        ) : (
+          <div className="mx-auto mt-10 grid max-w-[1160px] gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {data.map((category) => (
+              <Link
+                key={category._id}
+                href={`/services/${category._id}`}
+                className="group overflow-hidden rounded-xl bg-[#f1f1f1]"
+              >
+                <div className="relative h-[230px] sm:h-[250px]">
+                  <Image
+                    src={category.catImage}
+                    alt={`${category.name} service`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
+                    className="object-cover transition duration-300 group-hover:scale-105"
+                  />
+                </div>
+                <h3 className="py-5 text-center text-2xl font-bold text-[#383f44]">
+                  {category.name.trim()}
+                </h3>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
-  )
+  );
 }
