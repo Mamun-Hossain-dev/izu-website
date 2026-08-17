@@ -1,17 +1,17 @@
-import { Menu, MessageCircleMore, Search } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { UserMenu } from "@/components/shared/UserMenu";
+import { Menu, MessageCircleMore, Search } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { UserMenu } from '@/components/shared/UserMenu'
 
 const links = [
-  { label: "Home", href: "/#home", key: "home" },
-  { label: "Categories", href: "/categories", key: "categories" },
-  { label: "Booking", href: "/bookings", key: "booking" },
-  { label: "About Us", href: "/about-us", key: "about" },
-  { label: "Contact", href: "/contact-us", key: "contact" },
-];
+  { label: 'Home', href: '/#home', key: 'home' },
+  { label: 'Categories', href: '/categories', key: 'categories' },
+  { label: 'Booking', href: '/bookings', key: 'booking' },
+  { label: 'About Us', href: '/about-us', key: 'about' },
+  { label: 'Contact', href: '/contact-us', key: 'contact' },
+]
 
-export function LandingHeader({ active = "home" }: { active?: string }) {
+export function LandingHeader({ active = 'home' }: { active?: string }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-16 bg-white shadow-sm">
       <div className="container flex h-full items-center justify-between">
@@ -26,12 +26,19 @@ export function LandingHeader({ active = "home" }: { active?: string }) {
           />
         </Link>
 
-        <nav aria-label="Main navigation" className="hidden items-center gap-6 text-base md:flex">
-          {links.map((link) => (
+        <nav
+          aria-label="Main navigation"
+          className="hidden items-center gap-6 text-base md:flex"
+        >
+          {links.map(link => (
             <Link
               key={link.href}
               href={link.href}
-              className={link.key === active ? "font-bold text-[#2674b7]" : "text-[#171717] transition hover:text-[#2674b7]"}
+              className={
+                link.key === active
+                  ? 'font-bold text-[#2674b7]'
+                  : 'text-[#171717] transition hover:text-[#2674b7]'
+              }
             >
               {link.label}
             </Link>
@@ -39,10 +46,18 @@ export function LandingHeader({ active = "home" }: { active?: string }) {
         </nav>
 
         <div className="hidden items-center gap-5 md:flex">
-          <Link href="/categories" aria-label="Search services" className="transition hover:text-[#2674b7]">
+          <Link
+            href="/categories"
+            aria-label="Search services"
+            className="transition hover:text-[#2674b7]"
+          >
             <Search className="size-5" />
           </Link>
-          <Link href="/message" aria-label="Contact support" className="transition hover:text-[#2674b7]">
+          <Link
+            href="/message"
+            aria-label="Contact support"
+            className="transition hover:text-[#2674b7]"
+          >
             <MessageCircleMore className="size-5" />
           </Link>
           <UserMenu />
@@ -53,11 +68,15 @@ export function LandingHeader({ active = "home" }: { active?: string }) {
             <Menu />
           </summary>
           <nav className="absolute right-0 top-12 flex w-52 flex-col rounded-lg border bg-white p-2 shadow-lg">
-            {links.map((link) => (
+            {links.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={link.key === active ? "rounded bg-[#eff7fd] px-4 py-3 font-bold text-[#2674b7]" : "rounded px-4 py-3 hover:bg-[#eff7fd]"}
+                className={
+                  link.key === active
+                    ? 'rounded bg-[#eff7fd] px-4 py-3 font-bold text-[#2674b7]'
+                    : 'rounded px-4 py-3 hover:bg-[#eff7fd]'
+                }
               >
                 {link.label}
               </Link>
@@ -67,5 +86,5 @@ export function LandingHeader({ active = "home" }: { active?: string }) {
         </details>
       </div>
     </header>
-  );
+  )
 }
