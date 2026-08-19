@@ -5,7 +5,7 @@ import { LandingFooter } from "@/components/landing/landing-footer";
 
 const MessagePage = () => {
   return (
-    <div className="pt-16">
+    <div className="pt-16 overflow-x-clip">
       <LandingHeader active="message" />
       <MessageContainer />
       <LandingFooter />

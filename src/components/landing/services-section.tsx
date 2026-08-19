@@ -11,7 +11,7 @@ import { useRef } from "react";
 
 function ServicesSectionSkeleton() {
   return (
-    <div className="container mt-9 flex gap-4 overflow-hidden">
+    <div className="container mt-9 flex gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {Array.from({ length: 4 }, (_, index) => (
         <div key={index} className="w-[290px] shrink-0 overflow-hidden rounded-xl bg-[#f1f1f1] sm:w-[340px]">
           <Skeleton className="h-[220px] w-full rounded-none sm:h-[250px]" />

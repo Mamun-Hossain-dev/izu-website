@@ -4,7 +4,7 @@ import { LandingHeader } from '@/components/landing/landing-header'
 
 const ChangePasswordPage = () => {
   return (
-    <div className="pt-16">
+    <div className="pt-16 overflow-x-clip">
       <LandingHeader />
       <ChangePasswordContainer />
       <LandingFooter />

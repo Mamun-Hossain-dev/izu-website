@@ -66,7 +66,7 @@ const staticAccessToken =
 
 const changePassword = async (values: ChangePasswordInput): Promise<string> => {
   const apiBaseUrl =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5008/api/v1'
   const response = await fetch(`${apiBaseUrl}/profile/change-password`, {
     method: 'PATCH',
     credentials: 'include',
@@ -158,7 +158,7 @@ const ChangePasswordContainer = () => {
 
         <div className="mt-10 grid items-start gap-5 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:mt-12 sm:p-4 lg:grid-cols-[280px_minmax(0,1fr)]">
           <ProfileSidebar />
-          <div className="min-h-[500px] rounded-lg border border-slate-200 bg-[#f8f9fa] p-5 sm:p-8 lg:p-10">
+          <div className="min-h-[440px] rounded-lg border border-slate-200 bg-[#f8f9fa] p-5 sm:min-h-[500px] sm:p-8 lg:p-10">
             <h2 className="text-2xl font-semibold text-slate-800">
               Change Password
             </h2>

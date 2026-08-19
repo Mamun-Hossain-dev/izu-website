@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function BookingAliasPage() {
   return (
-    <main className="min-h-screen bg-white pt-16 text-[#101010] flex flex-col justify-between">
+    <main className="min-h-screen overflow-x-clip bg-white pt-16 text-[#101010] flex flex-col justify-between">
       <LandingHeader active="booking" />
       <div className="flex-1 bg-white">
         <BookingContainer />

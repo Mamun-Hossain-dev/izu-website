@@ -5,7 +5,7 @@ import { LandingHeader } from '@/components/landing/landing-header'
 
 const TermsAndConditionPage = () => {
   return (
-    <div className="pt-16">
+    <div className="pt-16 overflow-x-clip">
       <LandingHeader />
       <TermsAndConditionsContainer/>
       <LandingFooter />

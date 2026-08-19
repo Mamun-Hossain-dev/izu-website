@@ -6,163 +6,192 @@ import { ReviewModal } from "./review-modal";
 import { RescheduleModal } from "./reschedule-modal";
 import { LocationModal } from "./location-modal";
 import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  getLiveBookings,
+  getUpcomingBookings,
+  getCompletedBookings,
+  getCancelledBookings,
+  cancelBooking,
+  confirmRequest,
+  confirmCompletionRequest,
+  type Booking,
+} from "@/services/booking-api";
+import { getApiErrorMessage } from "@/lib/api-error";
+import { useAuthStore } from "@/store/auth-store";
+import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
-const INITIAL_BOOKINGS: BookingItem[] = [
-  // Live Bookings
-  {
-    id: "live-1",
-    providerName: "Priyanka Rs",
-    providerAvatar: "/images/priyanka.png",
-    address: "13th Street. 47 W 13th St, New York, NY 10011",
-    date: "12 July 2025",
-    time: "10:00 AM",
-    amount: "$550",
-    status: "live",
-    orderStatus: "Pending",
-    initialTimerSeconds: 3630, // 01h 60m 30s
-  },
-  // Next Bookings
-  {
-    id: "next-1",
-    providerName: "Priyanka Rs",
-    providerAvatar: "/images/priyanka.png",
-    address: "13th Street. 47 W 13th St, New York, NY 10011",
-    date: "12 July 2025",
-    time: "10:00 AM",
-    amount: "$550",
-    status: "next",
-    orderStatus: "Pending",
-  },
-  {
-    id: "next-2",
-    providerName: "Priyanka Rs",
-    providerAvatar: "/images/priyanka.png",
-    address: "13th Street. 47 W 13th St, New York, NY 10011",
-    date: "12 July 2025",
-    time: "10:00 AM",
-    amount: "$550",
-    status: "next",
-    orderStatus: "Pending",
-  },
-  // Completed Bookings
-  {
-    id: "completed-1",
-    providerName: "Priyanka Rs",
-    providerAvatar: "/images/priyanka.png",
-    address: "13th Street. 47 W 13th St, New York, NY 10011",
-    date: "12 July 2025",
-    time: "10:00 AM",
-    amount: "$550",
-    status: "completed",
-  },
-  {
-    id: "completed-2",
-    providerName: "Priyanka Rs",
-    providerAvatar: "/images/priyanka.png",
-    address: "13th Street. 47 W 13th St, New York, NY 10011",
-    date: "12 July 2025",
-    time: "10:00 AM",
-    amount: "$550",
-    status: "completed",
-  },
-  {
-    id: "completed-3",
-    providerName: "Priyanka Rs",
-    providerAvatar: "/images/priyanka.png",
-    address: "13th Street. 47 W 13th St, New York, NY 10011",
-    date: "12 July 2025",
-    time: "10:00 AM",
-    amount: "$550",
-    status: "completed",
-  },
-  // Canceled Bookings
-  {
-    id: "canceled-1",
-    providerName: "Priyanka Rs",
-    providerAvatar: "/images/priyanka.png",
-    address: "13th Street. 47 W 13th St, New York, NY 10011",
-    date: "12 July 2025",
-    time: "10:00 AM",
-    status: "canceled",
-  },
-  {
-    id: "canceled-2",
-    providerName: "Priyanka Rs",
-    providerAvatar: "/images/priyanka.png",
-    address: "13th Street. 47 W 13th St, New York, NY 10011",
-    date: "12 July 2025",
-    time: "10:00 AM",
-    status: "canceled",
-  },
-  {
-    id: "canceled-3",
-    providerName: "Priyanka Rs",
-    providerAvatar: "/images/priyanka.png",
-    address: "13th Street. 47 W 13th St, New York, NY 10011",
-    date: "12 July 2025",
-    time: "10:00 AM",
-    status: "canceled",
-  },
-];
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  accepted: "Accepted",
+  upcoming: "Upcoming",
+  ongoing: "Ongoing",
+  "waiting-for-start": "Waiting for provider",
+  "awaiting-user-confirmation-for-acceptance": "Confirm to start",
+  "awaiting-user-confirmation-for-completion": "Confirm completion",
+  completed: "Completed",
+  cancelled: "Cancelled",
+};
+
+function toBookingItem(booking: Booking, tab: BookingStatus): BookingItem {
+  const provider =
+    (typeof booking.serviceId?.providerId === "object"
+      ? booking.serviceId.providerId
+      : null) ||
+    (typeof booking.providerId === "object" ? booking.providerId : null);
+  const bookingDate = new Date(booking.bookingTime);
+  const category = booking.serviceId?.category;
+  const validDate = !isNaN(bookingDate.getTime());
+
+  return {
+    id: booking._id,
+    providerName: provider?.name || "Service Provider",
+    providerAvatar:
+      provider?.profileImage || "/images/customer-rikan-bhart.jpg",
+    address: booking.location?.address || "Location not provided",
+    date: validDate
+      ? bookingDate.toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : "—",
+    time: validDate
+      ? bookingDate.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "—",
+    amount: `$${booking.totalPrice ?? 0}`,
+    status: tab,
+    orderStatus: STATUS_LABELS[booking.status] || booking.status,
+    startTime:
+      booking.acceptStartServiceTime ||
+      (booking.status === "ongoing" ? booking.bookingTime : undefined),
+    serviceId: booking.serviceId?._id,
+    serviceTitle:
+      booking.serviceId?.serviceDetails?.title || booking.title || "",
+    categoryId:
+      typeof category === "object" && category
+        ? category._id
+        : typeof category === "string"
+          ? category
+          : undefined,
+  };
+}
+
+function BookingSkeleton() {
+  return (
+    <div className="space-y-6">
+      {[0, 1, 2].map((item) => (
+        <div key={item} className="w-full rounded-2xl border border-[#cbd5e1] p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-10 rounded-full" />
+              <Skeleton className="h-5 w-40" />
+            </div>
+            <Skeleton className="h-5 w-24" />
+          </div>
+          <div className="mt-5 space-y-2.5">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+          <Skeleton className="mt-6 h-11 w-full rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function BookingContainer() {
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<BookingStatus>("live");
-  const [bookings, setBookings] = useState<BookingItem[]>(INITIAL_BOOKINGS);
 
-  // Modal States
-  const [reviewModalOpen, setReviewModalOpen] = useState(false);
-  const [reviewProviderName, setReviewProviderName] = useState("Madiha Lata");
-  const [reviewProviderAvatar, setReviewProviderAvatar] = useState("/images/madiha.png");
+  const [reviewBooking, setReviewBooking] = useState<BookingItem | null>(null);
+  const [rescheduleBookingItem, setRescheduleBookingItem] =
+    useState<BookingItem | null>(null);
+  const [locationBooking, setLocationBooking] = useState<BookingItem | null>(
+    null
+  );
 
-  const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
-  const [activeBookingForReschedule, setActiveBookingForReschedule] = useState<BookingItem | null>(null);
+  const enabled = !!user;
+  const liveQuery = useQuery({
+    queryKey: ["bookings", "live"],
+    queryFn: getLiveBookings,
+    enabled,
+  });
+  const upcomingQuery = useQuery({
+    queryKey: ["bookings", "upcoming"],
+    queryFn: getUpcomingBookings,
+    enabled,
+  });
+  const completedQuery = useQuery({
+    queryKey: ["bookings", "completed"],
+    queryFn: getCompletedBookings,
+    enabled,
+  });
+  const cancelledQuery = useQuery({
+    queryKey: ["bookings", "cancelled"],
+    queryFn: getCancelledBookings,
+    enabled,
+  });
 
-  const [locationModalOpen, setLocationModalOpen] = useState(false);
-  const [activeBookingForLocation, setActiveBookingForLocation] = useState<BookingItem | null>(null);
-
-  const filteredBookings = bookings.filter((b) => b.status === activeTab);
-
-  // Handlers
-  const handleOpenContact = (booking: BookingItem) => {
-    setReviewProviderName(booking.providerName || "Madiha Lata");
-    setReviewProviderAvatar(booking.providerAvatar || "/images/madiha.png");
-    setReviewModalOpen(true);
+  const queries: Record<BookingStatus, typeof liveQuery> = {
+    live: liveQuery,
+    next: upcomingQuery,
+    completed: completedQuery,
+    canceled: cancelledQuery,
   };
 
-  const handleOpenReview = (booking: BookingItem) => {
-    setReviewProviderName(booking.providerName);
-    setReviewProviderAvatar(booking.providerAvatar);
-    setReviewModalOpen(true);
-  };
+  const activeQuery = queries[activeTab];
+  const invalidateBookings = () =>
+    queryClient.invalidateQueries({ queryKey: ["bookings"] });
 
-  const handleOpenLocation = (booking: BookingItem) => {
-    setActiveBookingForLocation(booking);
-    setLocationModalOpen(true);
-  };
+  const cancelMutation = useMutation({
+    mutationFn: (bookingId: string) => cancelBooking(bookingId),
+    onSuccess: (result) => {
+      toast.success(result.message || "Booking cancelled.");
+      invalidateBookings();
+    },
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Unable to cancel booking.")),
+  });
 
-  const handleOpenReschedule = (booking: BookingItem) => {
-    setActiveBookingForReschedule(booking);
-    setRescheduleModalOpen(true);
-  };
+  const confirmStartMutation = useMutation({
+    mutationFn: (bookingId: string) => confirmRequest(bookingId),
+    onSuccess: (result) => {
+      toast.success(result.message || "Booking confirmed and started.");
+      invalidateBookings();
+    },
+    onError: (error) =>
+      toast.error(
+        getApiErrorMessage(error, "Unable to confirm booking start.")
+      ),
+  });
 
-  const handleCancelBooking = (booking: BookingItem) => {
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.id === booking.id ? { ...b, status: "canceled" } : b
-      )
-    );
-    toast.info(`Booking with ${booking.providerName} has been canceled.`);
-  };
+  const confirmCompletionMutation = useMutation({
+    mutationFn: (bookingId: string) => confirmCompletionRequest(bookingId),
+    onSuccess: (result) => {
+      toast.success(result.message || "Booking marked as completed.");
+      invalidateBookings();
+    },
+    onError: (error) =>
+      toast.error(
+        getApiErrorMessage(error, "Unable to confirm booking completion.")
+      ),
+  });
 
-  const handleRescheduleSuccess = (newDate: string, newTime: string) => {
-    if (!activeBookingForReschedule) return;
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.id === activeBookingForReschedule.id
-          ? { ...b, date: newDate, time: newTime, status: "next" }
-          : b
-      )
-    );
+  const handleOpenContact = () => router.push("/message");
+
+  const handleRebook = (booking: BookingItem) => {
+    if (!booking.categoryId || !booking.serviceId) return;
+    router.push(`/services/${booking.categoryId}/details/${booking.serviceId}`);
   };
 
   const tabs: { key: BookingStatus; label: string }[] = [
@@ -172,9 +201,28 @@ export function BookingContainer() {
     { key: "canceled", label: "Canceled" },
   ];
 
+  if (!user) {
+    return (
+      <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-4 py-16 text-center">
+        <h1 className="text-3xl font-bold text-[#101010]">Booking</h1>
+        <p className="mt-2 max-w-xl text-sm text-[#64748b]">
+          Sign in to view and manage your service bookings.
+        </p>
+        <Link
+          href="/login"
+          className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-[#2674b7] px-8 text-sm font-medium text-white transition hover:bg-[#1d64a0]"
+        >
+          Sign in to continue
+        </Link>
+      </div>
+    );
+  }
+
+  const filteredBookings =
+    activeQuery.data?.map((booking) => toBookingItem(booking, activeTab)) || [];
+
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-10 sm:py-14">
-      {/* Main Page Title & Subtitle */}
       <div className="text-center mb-8 sm:mb-10">
         <h1 className="text-3xl sm:text-4xl font-bold text-[#101010] mb-2 tracking-tight">
           Booking
@@ -185,7 +233,6 @@ export function BookingContainer() {
         </p>
       </div>
 
-      {/* Filter Tabs Bar */}
       <div className="flex items-center justify-center gap-3 sm:gap-4 mb-8 overflow-x-auto pb-2 scrollbar-none">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -193,7 +240,7 @@ export function BookingContainer() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-6 sm:px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border whitespace-nowrap ${
+              className={`px-4 sm:px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border whitespace-nowrap ${
                 isActive
                   ? "bg-[#2674b7] text-white border-[#2674b7] shadow-sm"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400"
@@ -205,18 +252,37 @@ export function BookingContainer() {
         })}
       </div>
 
-      {/* Booking Cards Stack */}
       <div className="space-y-6">
-        {filteredBookings.length > 0 ? (
+        {activeQuery.isLoading ? (
+          <BookingSkeleton />
+        ) : activeQuery.isError ? (
+          <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-red-300">
+            <p className="text-red-600 font-medium">
+              {getApiErrorMessage(activeQuery.error, "Failed to load bookings.")}
+            </p>
+            <button
+              type="button"
+              onClick={() => activeQuery.refetch()}
+              className="mt-4 inline-flex h-10 items-center justify-center rounded-full border border-[#2674b7] px-6 text-sm font-medium text-[#2674b7] transition hover:bg-[#eef7fd]"
+            >
+              Try again
+            </button>
+          </div>
+        ) : filteredBookings.length > 0 ? (
           filteredBookings.map((booking) => (
             <BookingCard
               key={booking.id}
               booking={booking}
-              onOpenLocation={handleOpenLocation}
+              onOpenLocation={(item) => setLocationBooking(item)}
               onOpenContact={handleOpenContact}
-              onOpenReschedule={handleOpenReschedule}
-              onCancelBooking={handleCancelBooking}
-              onOpenReview={handleOpenReview}
+              onOpenReschedule={(item) => setRescheduleBookingItem(item)}
+              onCancelBooking={(item) => cancelMutation.mutate(item.id)}
+              onOpenReview={(item) => setReviewBooking(item)}
+              onConfirmStart={(item) => confirmStartMutation.mutate(item.id)}
+              onConfirmCompletion={(item) =>
+                confirmCompletionMutation.mutate(item.id)
+              }
+              onRebook={handleRebook}
             />
           ))
         ) : (
@@ -228,28 +294,30 @@ export function BookingContainer() {
         )}
       </div>
 
-      {/* Modals */}
       <ReviewModal
-        isOpen={reviewModalOpen}
-        onClose={() => setReviewModalOpen(false)}
-        providerName={reviewProviderName}
-        providerAvatar={reviewProviderAvatar}
+        isOpen={!!reviewBooking}
+        onClose={() => setReviewBooking(null)}
+        bookingId={reviewBooking?.id}
+        serviceId={reviewBooking?.serviceId}
+        providerName={reviewBooking?.providerName}
+        providerAvatar={reviewBooking?.providerAvatar}
+        onSubmitSuccess={() => invalidateBookings()}
       />
 
       <RescheduleModal
-        isOpen={rescheduleModalOpen}
-        onClose={() => setRescheduleModalOpen(false)}
-        bookingId={activeBookingForReschedule?.id || ""}
-        currentDate={activeBookingForReschedule?.date}
-        currentTime={activeBookingForLocation?.time}
-        onRescheduleSuccess={handleRescheduleSuccess}
+        isOpen={!!rescheduleBookingItem}
+        onClose={() => setRescheduleBookingItem(null)}
+        bookingId={rescheduleBookingItem?.id}
+        currentDate={rescheduleBookingItem?.date}
+        currentTime={rescheduleBookingItem?.time}
+        onRescheduleSuccess={() => invalidateBookings()}
       />
 
       <LocationModal
-        isOpen={locationModalOpen}
-        onClose={() => setLocationModalOpen(false)}
-        address={activeBookingForLocation?.address}
-        providerName={activeBookingForLocation?.providerName}
+        isOpen={!!locationBooking}
+        onClose={() => setLocationBooking(null)}
+        address={locationBooking?.address}
+        providerName={locationBooking?.providerName}
       />
     </div>
   );

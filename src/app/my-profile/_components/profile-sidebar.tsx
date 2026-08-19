@@ -28,7 +28,7 @@ const staticAccessToken =
 
 const fetchProfile = async (): Promise<Profile> => {
   const apiBaseUrl =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5008/api/v1'
   const response = await fetch(`${apiBaseUrl}/profile`, {
     credentials: 'include',
     headers: {
@@ -49,7 +49,7 @@ const updateProfileImage = async (profileImage: File): Promise<Profile> => {
   formData.append('profileImage', profileImage)
 
   const apiBaseUrl =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5008/api/v1'
   const response = await fetch(`${apiBaseUrl}/profile`, {
     method: 'PATCH',
     credentials: 'include',

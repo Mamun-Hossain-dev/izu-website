@@ -15,6 +15,8 @@ import {
   Clock3,
   Star,
   RotateCcw,
+  Play,
+  Flag,
 } from "lucide-react";
 
 export type BookingStatus = "live" | "next" | "completed" | "canceled";
@@ -30,6 +32,10 @@ export interface BookingItem {
   status: BookingStatus;
   orderStatus?: string;
   initialTimerSeconds?: number;
+  startTime?: string;
+  serviceId?: string;
+  serviceTitle?: string;
+  categoryId?: string;
 }
 
 interface BookingCardProps {
@@ -39,7 +45,12 @@ interface BookingCardProps {
   onOpenReschedule?: (booking: BookingItem) => void;
   onCancelBooking?: (booking: BookingItem) => void;
   onOpenReview?: (booking: BookingItem) => void;
+  onConfirmStart?: (booking: BookingItem) => void;
+  onConfirmCompletion?: (booking: BookingItem) => void;
+  onRebook?: (booking: BookingItem) => void;
 }
+
+const pad = (n: number) => n.toString().padStart(2, "0");
 
 export function BookingCard({
   booking,
@@ -48,33 +59,43 @@ export function BookingCard({
   onOpenReschedule,
   onCancelBooking,
   onOpenReview,
+  onConfirmStart,
+  onConfirmCompletion,
+  onRebook,
 }: BookingCardProps) {
-  // Live timer state for "live" booking items
-  const [secondsRemaining, setSecondsRemaining] = useState<number>(
-    booking.initialTimerSeconds || 7230 // 01h 60m 30s approx
+  const [elapsed, setElapsed] = useState<number | null>(null);
+  const [countdown, setCountdown] = useState<number>(
+    booking.initialTimerSeconds || 7230
   );
 
   useEffect(() => {
     if (booking.status !== "live") return;
+
+    if (booking.startTime) {
+      const start = new Date(booking.startTime).getTime();
+      const tick = () =>
+        setElapsed(Math.max(0, Math.floor((Date.now() - start) / 1000)));
+      tick();
+      const interval = setInterval(tick, 1000);
+      return () => clearInterval(interval);
+    }
+
     const interval = setInterval(() => {
-      setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(interval);
-  }, [booking.status]);
+  }, [booking.status, booking.startTime]);
 
-  const formatTimer = (totalSeconds: number) => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    const pad = (n: number) => n.toString().padStart(2, "0");
-    return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
-  };
+  const formatElapsed = (totalSeconds: number) =>
+    `${pad(Math.floor(totalSeconds / 3600))}h ${pad(
+      Math.floor((totalSeconds % 3600) / 60)
+    )}m ${pad(totalSeconds % 60)}s`;
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-[#cbd5e1] p-6 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="w-full bg-white rounded-2xl border border-[#cbd5e1] p-4 shadow-sm hover:shadow-md transition-all duration-200 sm:p-6">
       {/* Top Header: Provider Avatar & Name + Status Badge */}
       <div className="flex items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="relative size-10 rounded-full overflow-hidden border border-gray-200 bg-gray-100 shrink-0">
             <Image
               src={booking.providerAvatar}
@@ -83,28 +104,35 @@ export function BookingCard({
               className="object-cover"
             />
           </div>
-          <h3 className="font-semibold text-base text-[#101010]">
-            {booking.providerName}
-          </h3>
+          <div className="min-w-0">
+            <h3 className="font-semibold text-base text-[#101010] truncate">
+              {booking.providerName}
+            </h3>
+            {booking.serviceTitle && (
+              <p className="text-xs text-gray-500 truncate">
+                {booking.serviceTitle}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Right Status Badges based on Tab */}
         {booking.status === "next" && (
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#2674b7]">
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#2674b7] shrink-0">
             <Clock3 className="size-4" />
             <span>Upcoming</span>
           </div>
         )}
 
         {booking.status === "completed" && (
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#22c55e]">
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#22c55e] shrink-0">
             <CheckCircle2 className="size-4" />
             <span>Completed</span>
           </div>
         )}
 
         {booking.status === "canceled" && (
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#ef4444]">
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#ef4444] shrink-0">
             <XCircle className="size-4" />
             <span>Canceled</span>
           </div>
@@ -115,8 +143,11 @@ export function BookingCard({
       {booking.status === "live" && (
         <div className="mb-4">
           <div className="text-3xl sm:text-4xl font-bold tracking-tight text-[#101010]">
-            {formatTimer(secondsRemaining)}
+            {elapsed !== null ? formatElapsed(elapsed) : formatElapsed(countdown)}
           </div>
+          {elapsed !== null && (
+            <p className="text-xs text-gray-500 mt-1">Service time elapsed</p>
+          )}
         </div>
       )}
 
@@ -181,13 +212,31 @@ export function BookingCard({
             <Navigation className="size-4 rotate-45" />
             Location
           </button>
-          <button
-            onClick={() => onOpenContact && onOpenContact(booking)}
-            className="w-full sm:flex-1 border border-[#f97316] text-[#f97316] hover:bg-orange-50 font-medium py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2 text-sm"
-          >
-            Contact
-            <MessageCircleMore className="size-4" />
-          </button>
+          {booking.orderStatus === "Confirm to start" ? (
+            <button
+              onClick={() => onConfirmStart && onConfirmStart(booking)}
+              className="w-full sm:flex-1 bg-[#22c55e] hover:bg-[#16a34a] text-white font-medium py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
+            >
+              <Play className="size-4" />
+              Confirm &amp; Start
+            </button>
+          ) : booking.orderStatus === "Confirm completion" ? (
+            <button
+              onClick={() => onConfirmCompletion && onConfirmCompletion(booking)}
+              className="w-full sm:flex-1 bg-[#22c55e] hover:bg-[#16a34a] text-white font-medium py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
+            >
+              <Flag className="size-4" />
+              Confirm Completion
+            </button>
+          ) : (
+            <button
+              onClick={() => onOpenContact && onOpenContact(booking)}
+              className="w-full sm:flex-1 border border-[#f97316] text-[#f97316] hover:bg-orange-50 font-medium py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2 text-sm"
+            >
+              Contact
+              <MessageCircleMore className="size-4" />
+            </button>
+          )}
         </div>
       )}
 
@@ -223,8 +272,9 @@ export function BookingCard({
       {booking.status === "canceled" && (
         <div className="flex justify-end pt-2">
           <button
-            onClick={() => onOpenReschedule && onOpenReschedule(booking)}
-            className="w-full sm:w-auto border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2.5 px-5 rounded-full transition-all flex items-center justify-center gap-2 text-xs sm:text-sm"
+            onClick={() => onRebook && onRebook(booking)}
+            disabled={!booking.serviceId}
+            className="w-full sm:w-auto border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2.5 px-5 rounded-full transition-all flex items-center justify-center gap-2 text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RotateCcw className="size-3.5" />
             Re-book Service

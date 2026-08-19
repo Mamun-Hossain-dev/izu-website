@@ -1,6 +1,7 @@
-import { Menu, MessageCircleMore, Search } from 'lucide-react'
+import { Menu, MessageCircleMore } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { SearchBox } from '@/components/landing/search-box'
 import { UserMenu } from '@/components/shared/UserMenu'
 
 const links = [
@@ -46,13 +47,7 @@ export function LandingHeader({ active = 'home' }: { active?: string }) {
         </nav>
 
         <div className="hidden items-center gap-5 md:flex">
-          <Link
-            href="/categories"
-            aria-label="Search services"
-            className="transition hover:text-[#2674b7]"
-          >
-            <Search className="size-5" />
-          </Link>
+          <SearchBox className="hidden w-52 lg:block xl:w-72" />
           <Link
             href="/message"
             aria-label="Contact support"
@@ -67,7 +62,8 @@ export function LandingHeader({ active = 'home' }: { active?: string }) {
           <summary className="grid size-9 cursor-pointer list-none place-items-center rounded-md text-[#2674b7] [&::-webkit-details-marker]:hidden">
             <Menu />
           </summary>
-          <nav className="absolute right-0 top-12 flex w-52 flex-col rounded-lg border bg-white p-2 shadow-lg">
+          <nav className="absolute right-0 top-12 flex w-64 max-h-[calc(100svh-4rem)] flex-col gap-2 overflow-y-auto rounded-lg border bg-white p-2 shadow-lg">
+            <SearchBox className="w-full" />
             {links.map(link => (
               <Link
                 key={link.href}

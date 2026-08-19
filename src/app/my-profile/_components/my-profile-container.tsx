@@ -27,7 +27,7 @@ const staticAccessToken =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhODE0MzRhY2M0OGVlODU2MGEwYjM2YSIsImlhdCI6MTc4Njg1NjI3OCwiZXhwIjoxNzg3NDYxMDc4fQ.TnbrIwpTFYJEsO5MoF-DrWMKo0DJXOIQgIoc8W9d2js'
 
 const getApiBaseUrl = () =>
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5008/api/v1'
 
 const fetchProfile = async (): Promise<Profile> => {
   const response = await fetch(`${getApiBaseUrl()}/profile`, {
@@ -129,7 +129,7 @@ const MyProfileContainer = () => {
         <div className="mt-10 grid items-start gap-5 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:mt-12 sm:p-4 lg:grid-cols-[280px_minmax(0,1fr)]">
           <ProfileSidebar />
 
-          <div className="min-h-[500px] rounded-lg border border-slate-200 bg-[#f8f9fa] p-5 sm:p-8 lg:p-10">
+          <div className="min-h-[440px] rounded-lg border border-slate-200 bg-[#f8f9fa] p-5 sm:min-h-[500px] sm:p-8 lg:p-10">
             <h2 className="text-2xl font-semibold text-slate-800">
               Edit Profile
             </h2>

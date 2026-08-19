@@ -1,4 +1,4 @@
-import { Phone } from "lucide-react";
+import { ChevronLeft, Phone } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { ChatAvatar } from "./chat-avatar";
 import { MessageBubble } from "./message-bubble";
@@ -12,9 +12,11 @@ type ConversationPanelProps = {
   isError: boolean;
   onSend: (content: string, files: File[]) => void;
   isSending: boolean;
+  onBack?: () => void;
+  className?: string;
 };
 
-export function ConversationPanel({ chat, messages, isLoading, isError, onSend, isSending }: ConversationPanelProps) {
+export function ConversationPanel({ chat, messages, isLoading, isError, onSend, isSending, onBack, className = "" }: ConversationPanelProps) {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,12 +24,26 @@ export function ConversationPanel({ chat, messages, isLoading, isError, onSend, 
   }, [messages.length, chat?._id]);
 
   if (!chat) {
-    return <section className="grid min-h-[430px] place-items-center bg-white p-8 text-center text-sm text-slate-500">Select a conversation to view messages.</section>;
+    return (
+      <section className={`min-h-0 flex-1 flex-col items-center justify-center bg-white p-8 text-center text-sm text-slate-500 ${className}`}>
+        Select a conversation to view messages.
+      </section>
+    );
   }
 
   return (
-    <section className="flex min-h-[430px] flex-col bg-[#f8f9fa]">
-      <header className="flex h-14 items-center gap-3 border-b border-slate-100 bg-white px-4">
+    <section className={`min-h-0 flex-1 flex-col bg-[#f8f9fa] ${className}`}>
+      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-slate-100 bg-white px-4">
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back to conversations"
+            className="grid size-8 shrink-0 place-items-center rounded-md text-slate-600 transition hover:bg-slate-100 lg:hidden"
+          >
+            <ChevronLeft className="size-5" />
+          </button>
+        ) : null}
         <ChatAvatar name={chat.title || "Conversation"} imageUrl={chat.imageUrl} className="size-8" />
         <div className="min-w-0 flex-1"><h2 className="truncate text-sm font-semibold text-slate-800">{chat.title || "Conversation"}</h2><p className="text-[10px] text-slate-500">Conversation</p></div>
         <Phone className="size-4 text-slate-700" aria-label="Call unavailable" />

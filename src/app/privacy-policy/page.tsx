@@ -5,7 +5,7 @@ import { LandingHeader } from '@/components/landing/landing-header'
 
 const PrivacyPolicyPage = () => {
   return (
-    <div className="pt-16">
+    <div className="pt-16 overflow-x-clip">
       <LandingHeader />
       <PrivacyPolicyPolicyContainer/>
       <LandingFooter />
