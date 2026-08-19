@@ -8,6 +8,7 @@ type ChatListProps = {
   search: string;
   onSearchChange: (value: string) => void;
   onSelect: (chatId: string) => void;
+  className?: string;
 };
 
 const getLastMessageText = (chat: Chat) => {
@@ -17,19 +18,19 @@ const getLastMessageText = (chat: Chat) => {
   return "New message";
 };
 
-export function ChatList({ chats, selectedChatId, search, onSearchChange, onSelect }: ChatListProps) {
+export function ChatList({ chats, selectedChatId, search, onSearchChange, onSelect, className = "" }: ChatListProps) {
   const visibleChats = chats.filter((chat) =>
     chat.title.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())
   );
 
   return (
-    <aside className="flex min-h-0 flex-col border-b border-sky-100 bg-white p-3 lg:border-b-0 lg:border-r">
+    <aside className={`min-h-0 border-b border-sky-100 bg-white p-3 lg:border-b-0 lg:border-r ${className}`}>
       <label className="relative block">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <input value={search} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search conversations" className="h-10 w-full rounded-md border border-[#2674b7] bg-white pl-9 pr-3 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#2674b7]/20" />
       </label>
 
-      <div className="mt-3 min-h-0 space-y-1 overflow-y-auto pr-1">
+      <div className="mt-3 min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
         {visibleChats.map((chat) => {
           const active = chat._id === selectedChatId;
           return (

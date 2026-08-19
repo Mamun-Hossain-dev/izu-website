@@ -4,10 +4,15 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Star, X } from "lucide-react";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { submitServiceReview } from "@/services/booking-api";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
+  bookingId?: string;
+  serviceId?: string;
   providerName?: string;
   providerAvatar?: string;
   onSubmitSuccess?: () => void;
@@ -16,6 +21,8 @@ interface ReviewModalProps {
 export function ReviewModal({
   isOpen,
   onClose,
+  bookingId,
+  serviceId,
   providerName = "Madiha Lata",
   providerAvatar = "/images/madiha.png",
   onSubmitSuccess,
@@ -23,7 +30,30 @@ export function ReviewModal({
   const [rating, setRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
   const [reviewText, setReviewText] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const mutation = useMutation({
+    mutationFn: ({
+      rating,
+      message,
+    }: {
+      rating: number;
+      message?: string;
+    }) =>
+      submitServiceReview(bookingId!, {
+        rating,
+        message,
+        serviceId: serviceId!,
+      }),
+    onSuccess: (result) => {
+      toast.success(result.message || "Review submitted successfully.");
+      setRating(0);
+      setReviewText("");
+      if (onSubmitSuccess) onSubmitSuccess();
+      onClose();
+    },
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Unable to submit review.")),
+  });
 
   if (!isOpen) return null;
 
@@ -33,27 +63,19 @@ export function ReviewModal({
       toast.error("Please select a rating before submitting.");
       return;
     }
-
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      toast.success("Thank you for your feedback! Review submitted.");
-      if (onSubmitSuccess) onSubmitSuccess();
-      onClose();
-      // Reset form
-      setRating(0);
-      setReviewText("");
-    }, 600);
+    if (!bookingId || !serviceId) {
+      toast.error("Booking details are missing. Please try again.");
+      return;
+    }
+    mutation.mutate({ rating, message: reviewText });
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div 
-        className="relative w-full max-w-md bg-white rounded-2xl p-6 sm:p-8 shadow-2xl transition-all scale-in-95 duration-200"
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div
+        className="relative my-auto w-full max-w-md bg-white rounded-2xl p-6 sm:p-8 shadow-2xl transition-all scale-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors rounded-full p-1 hover:bg-gray-100"
@@ -63,7 +85,6 @@ export function ReviewModal({
         </button>
 
         <div className="flex flex-col items-center text-center">
-          {/* Party Popper / Celebration Banner Graphic */}
           <div className="relative mb-3 flex items-center justify-center size-20 rounded-full bg-blue-50">
             <span className="text-4xl animate-bounce">🎉</span>
           </div>
@@ -79,7 +100,6 @@ export function ReviewModal({
             How was your service?
           </p>
 
-          {/* Provider Info & Rating Card */}
           <div className="w-full bg-[#f8fafc] border border-gray-100 rounded-xl p-5 mb-6 flex flex-col items-center">
             <div className="flex items-center gap-3 mb-3">
               <div className="relative size-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
@@ -95,7 +115,6 @@ export function ReviewModal({
               </span>
             </div>
 
-            {/* Star Rating */}
             <div className="flex items-center gap-2 mb-2">
               {[1, 2, 3, 4, 5].map((star) => {
                 const active = (hoveredRating || rating) >= star;
@@ -122,7 +141,6 @@ export function ReviewModal({
             </div>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="w-full space-y-4">
             <div className="w-full">
               <textarea
@@ -136,10 +154,10 @@ export function ReviewModal({
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={mutation.isPending}
               className="w-full bg-[#2674b7] hover:bg-[#1d64a0] text-white font-medium py-3 rounded-xl transition-all shadow-md active:scale-[0.99] disabled:opacity-50 text-sm"
             >
-              {isSubmitting ? "Submitting..." : "Submit"}
+              {mutation.isPending ? "Submitting..." : "Submit"}
             </button>
           </form>
         </div>

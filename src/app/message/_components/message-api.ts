@@ -4,7 +4,7 @@ const staticAccessToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhODE0MzRhY2M0OGVlODU2MGEwYjM2YSIsImlhdCI6MTc4Njg1NjI3OCwiZXhwIjoxNzg3NDYxMDc4fQ.TnbrIwpTFYJEsO5MoF-DrWMKo0DJXOIQgIoc8W9d2js";
 
 const getApiBaseUrl = () =>
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5008/api/v1";
 
 const apiRequest = async <T>(path: string, init?: RequestInit): Promise<T> => {
   const response = await fetch(`${getApiBaseUrl()}${path}`, {

@@ -78,9 +78,25 @@ const MessageContainer = () => {
           ) : !chats.length ? (
             <div className="grid min-h-[460px] place-items-center rounded-md bg-white p-6 text-center"><div><h2 className="text-lg font-semibold text-slate-800">No conversations yet</h2><p className="mt-1 text-sm text-slate-500">Your messages with service professionals will appear here.</p></div></div>
           ) : (
-            <div className="grid h-[620px] overflow-hidden rounded-md bg-white sm:h-[680px] lg:grid-cols-[320px_minmax(0,1fr)]">
-              <ChatList chats={chats} selectedChatId={selectedChatId} search={search} onSearchChange={setSearch} onSelect={setSelectedChatId} />
-              <ConversationPanel chat={selectedChat} messages={messages} isLoading={isMessagesLoading} isError={isMessagesError} onSend={handleSend} isSending={sendMutation.isPending} />
+            <div className="flex h-[640px] flex-col overflow-hidden rounded-md bg-white sm:h-[700px] lg:grid lg:h-[680px] lg:grid-cols-[320px_minmax(0,1fr)]">
+              <ChatList
+                className={`flex-col ${selectedChatId ? "hidden lg:flex" : "flex"}`}
+                chats={chats}
+                selectedChatId={selectedChatId}
+                search={search}
+                onSearchChange={setSearch}
+                onSelect={setSelectedChatId}
+              />
+              <ConversationPanel
+                className={selectedChatId ? "flex" : "hidden lg:flex"}
+                onBack={selectedChatId ? () => setSelectedChatId(undefined) : undefined}
+                chat={selectedChat}
+                messages={messages}
+                isLoading={isMessagesLoading}
+                isError={isMessagesError}
+                onSend={handleSend}
+                isSending={sendMutation.isPending}
+              />
             </div>
           )}
         </div>

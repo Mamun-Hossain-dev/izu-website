@@ -85,7 +85,7 @@ export function TestimonialsSection() {
             <ChevronRight className="size-5" />
           </button>
         </div>
-        <div ref={track} className="mt-4 flex snap-x gap-6 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div ref={track} className="mt-4 flex snap-x gap-6 overflow-x-auto pb-2 scroll-px-4 sm:scroll-px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {testimonials.map((testimonial) => (
             <article key={testimonial.name} className="w-[245px] shrink-0 snap-start rounded-xl bg-white px-4 py-9 shadow-[1px_2px_4px_rgba(0,0,0,.25)] sm:w-[250px]">
               <p className="text-[15px] leading-[1.55] text-[#746b66]">{testimonial.review}</p>

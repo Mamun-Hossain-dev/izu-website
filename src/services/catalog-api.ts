@@ -47,6 +47,19 @@ type ApiResponse<T> = {
   data: T;
 };
 
+export type SearchResults = {
+  categories: Category[];
+  services: Service[];
+};
+
+export const searchCatalog = async (q: string): Promise<SearchResults> => {
+  const { data } = await axiosInstance.get<ApiResponse<SearchResults>>(
+    "/search",
+    { params: { q } }
+  );
+  return data.data;
+};
+
 export const getCategories = async (): Promise<Category[]> => {
   const { data } = await axiosInstance.get<ApiResponse<Category[]>>("/categories");
   return data.data;

@@ -3,6 +3,9 @@
 import React, { useState } from "react";
 import { X, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { rescheduleBooking } from "@/services/booking-api";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 interface RescheduleModalProps {
   isOpen: boolean;
@@ -10,19 +13,50 @@ interface RescheduleModalProps {
   bookingId?: string;
   currentDate?: string;
   currentTime?: string;
-  onRescheduleSuccess?: (newDate: string, newTime: string) => void;
+  onRescheduleSuccess?: () => void;
 }
+
+const toDateInputValue = (value: string): string => {
+  const parsed = new Date(value);
+  if (isNaN(parsed.getTime())) return new Date().toISOString().slice(0, 10);
+  return parsed.toISOString().slice(0, 10);
+};
+
+const to24h = (value: string): string => {
+  const match = value.match(/^(\d{1,2}):(\d{2})\s?(AM|PM)$/i);
+  if (!match) return value;
+  let hours = Number(match[1]);
+  const minutes = match[2];
+  const period = match[3].toUpperCase();
+  if (period === "PM" && hours !== 12) hours += 12;
+  if (period === "AM" && hours === 12) hours = 0;
+  return `${hours.toString().padStart(2, "0")}:${minutes}`;
+};
 
 export function RescheduleModal({
   isOpen,
   onClose,
+  bookingId,
   currentDate = "12 July 2025",
   currentTime = "10:00 AM",
   onRescheduleSuccess,
 }: RescheduleModalProps) {
-  const [selectedDate, setSelectedDate] = useState<string>("2025-07-15");
-  const [selectedTime, setSelectedTime] = useState<string>("10:00 AM");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    toDateInputValue(currentDate)
+  );
+  const [selectedTime, setSelectedTime] = useState<string>(currentTime);
+
+  const mutation = useMutation({
+    mutationFn: (bookingTime: string) =>
+      rescheduleBooking(bookingId!, { bookingTime }),
+    onSuccess: (result) => {
+      toast.success(result.message || "Booking rescheduled successfully!");
+      if (onRescheduleSuccess) onRescheduleSuccess();
+      onClose();
+    },
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Unable to reschedule booking.")),
+  });
 
   if (!isOpen) return null;
 
@@ -37,27 +71,19 @@ export function RescheduleModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      const formattedDate = new Date(selectedDate).toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-      toast.success(`Booking rescheduled to ${formattedDate} at ${selectedTime}!`);
-      if (onRescheduleSuccess) {
-        onRescheduleSuccess(formattedDate, selectedTime);
-      }
-      onClose();
-    }, 600);
+    if (!bookingId) {
+      toast.error("Booking details are missing. Please try again.");
+      return;
+    }
+    const date = selectedDate || toDateInputValue(currentDate);
+    const bookingTime = new Date(`${date}T${to24h(selectedTime)}`).toISOString();
+    mutation.mutate(bookingTime);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div 
-        className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl transition-all scale-in-95 duration-200"
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div
+        className="relative my-auto w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl transition-all scale-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -125,10 +151,10 @@ export function RescheduleModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={mutation.isPending}
               className="flex-1 bg-[#2674b7] hover:bg-[#1d64a0] text-white font-medium py-2.5 rounded-xl transition-all shadow-md text-sm disabled:opacity-50"
             >
-              {isSubmitting ? "Updating..." : "Confirm Schedule"}
+              {mutation.isPending ? "Updating..." : "Confirm Schedule"}
             </button>
           </div>
         </form>

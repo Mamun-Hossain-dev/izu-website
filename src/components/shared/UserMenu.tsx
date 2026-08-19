@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleUserRound } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -8,8 +8,39 @@ type UserMenuProps = {
   variant?: "desktop" | "mobile";
 };
 
+const FALLBACK_AVATAR = "/images/customer-rikan-bhart.jpg";
+
+const getApiBaseUrl = () =>
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5008/api/v1";
+
+const fetchProfile = async (accessToken: string) => {
+  const response = await fetch(`${getApiBaseUrl()}/profile`, {
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to retrieve your profile.");
+  }
+
+  const payload: { data: { name?: string; profileImage?: string } } =
+    await response.json();
+  return payload.data;
+};
+
 export function UserMenu({ variant = "desktop" }: UserMenuProps) {
   const user = useAuthStore((state) => state.user);
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.userId],
+    queryFn: () => fetchProfile(user!.accessToken),
+    enabled: !!user,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const avatar = profile?.profileImage || FALLBACK_AVATAR;
 
   if (!user) {
     return variant === "mobile" ? (
@@ -32,7 +63,12 @@ export function UserMenu({ variant = "desktop" }: UserMenuProps) {
         href="/my-profile"
         className="mt-1 flex items-center gap-2 rounded bg-[#eff7fd] px-4 py-3 font-bold text-[#2674b7]"
       >
-        <CircleUserRound className="size-5" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={avatar}
+          alt="My profile"
+          className="size-7 rounded-full object-cover"
+        />
         My Profile
       </Link>
     );
@@ -43,9 +79,14 @@ export function UserMenu({ variant = "desktop" }: UserMenuProps) {
       href="/my-profile"
       aria-label="My profile"
       title="My profile"
-      className="grid size-9 place-items-center rounded-md text-[#2674b7] transition hover:bg-[#eff7fd]"
+      className="grid size-9 place-items-center rounded-full text-[#2674b7] transition hover:bg-[#eff7fd]"
     >
-      <CircleUserRound className="size-6" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={avatar}
+        alt="My profile"
+        className="size-9 rounded-full object-cover"
+      />
     </Link>
   );
 }

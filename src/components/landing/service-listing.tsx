@@ -118,16 +118,17 @@ export function ServiceListing({ categoryId }: { categoryId: string }) {
   return (
     <section className="bg-white py-14 sm:py-20">
       <div className="container mx-auto px-4">
-        <div className="relative mx-auto max-w-[1160px]">
+        <div className="mx-auto max-w-[1160px]">
           <Link
             href="/categories"
             aria-label="Back to categories"
-            className="absolute left-0 top-1 grid size-9 place-items-center rounded-full border border-[#313131] text-[#313131] transition hover:border-[#2877bb] hover:text-[#2877bb] sm:top-3"
+            className="inline-flex items-center gap-2 rounded-full border border-[#313131] px-4 py-2 text-sm font-medium text-[#313131] transition hover:border-[#2877bb] hover:text-[#2877bb]"
           >
-            <ArrowLeft className="size-5" />
+            <ArrowLeft className="size-4" />
+            Back
           </Link>
-          <div className="px-12 text-center">
-            <h1 className="text-3xl font-bold text-[#343b40] sm:text-4xl">
+          <div className="mt-5 text-center">
+            <h1 className="text-2xl font-bold text-[#343b40] sm:text-4xl">
               {isLoading ? (
                 <Skeleton className="mx-auto h-9 w-64" />
               ) : (
@@ -140,7 +141,6 @@ export function ServiceListing({ categoryId }: { categoryId: string }) {
             </p>
           </div>
         </div>
-
         {isLoading ? (
           <ServiceListingSkeleton />
         ) : isError ? (

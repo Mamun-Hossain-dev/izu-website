@@ -5,9 +5,20 @@ import {
   getServicePrice,
   type Service,
 } from '@/services/catalog-api'
-import { useQuery } from '@tanstack/react-query'
+import {
+  createBooking,
+  type CreateBookingPayload,
+} from '@/services/booking-api'
+import { useAuthStore } from '@/store/auth-store'
+import { getApiErrorMessage } from '@/lib/api-error'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CatalogEmpty, CatalogError } from '@/components/landing/catalog-states'
+import {
+  LocationPicker,
+  type PickedLocation,
+} from '@/components/landing/location-picker'
 import {
   ArrowLeft,
   Bookmark,
@@ -23,7 +34,9 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { FormEvent, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 const fallbackAvatar = '/images/customer-rikan-bhart.jpg'
 
@@ -48,7 +61,7 @@ function ModalShell({
 
   return (
     <div
-      className="fixed inset-0 z-[70] grid place-items-center bg-black/65 p-4"
+      className="fixed inset-0 z-[70] grid place-items-center overflow-y-auto bg-black/65 p-4"
       role="presentation"
       onMouseDown={onClose}
     >
@@ -56,7 +69,7 @@ function ModalShell({
         role="dialog"
         aria-modal="true"
         aria-label={label}
-        className="w-full max-w-[590px] rounded-md bg-white p-5 shadow-2xl sm:p-6"
+        className="my-auto w-full max-w-[590px] rounded-md bg-white p-5 shadow-2xl sm:p-6"
         onMouseDown={event => event.stopPropagation()}
       >
         {children}
@@ -100,9 +113,35 @@ export function ServiceDetails({
     queryFn: () => getServiceById(serviceId),
   })
 
+  const router = useRouter()
+  const user = useAuthStore((state) => state.user)
   const [modal, setModal] = useState<ModalName>(null)
   const [bookmarked, setBookmarked] = useState(false)
   const [activeImage, setActiveImage] = useState(0)
+  const [bookingDate, setBookingDate] = useState('')
+  const [bookingTime, setBookingTime] = useState('')
+  const [bookingLocation, setBookingLocation] = useState<PickedLocation>({
+    coordinates: [],
+    address: '',
+  })
+  const [estimatedHours, setEstimatedHours] = useState(1)
+
+  const bookingMutation = useMutation({
+    mutationFn: (payload: CreateBookingPayload) => createBooking(payload),
+    onSuccess: (result) => {
+      toast.success(result.message || 'Booking request sent successfully.')
+      setModal(null)
+    },
+    onError: (err) => {
+      if (isAxiosError(err) && err.response?.status === 401) {
+        router.push('/login')
+        return
+      }
+      toast.error(
+        getApiErrorMessage(err, 'Unable to create booking. Please try again.')
+      )
+    },
+  })
 
   if (isLoading) return <DetailsSkeleton />
   if (isError) return <CatalogError error={error} onRetry={() => refetch()} />
@@ -127,27 +166,57 @@ export function ServiceDetails({
     details.serviceType === 'hourly'
       ? details.hourlyPrice
       : details.perSessionPrice
-  const total = priceValue != null ? priceValue * 5 : 0
+  const total =
+    priceValue != null
+      ? details.serviceType === 'hourly'
+        ? priceValue * estimatedHours
+        : priceValue
+      : 0
 
   function submitBooking(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setModal('accepted')
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    if (!bookingDate || !bookingTime) {
+      toast.error('Please select booking date and time.')
+      return
+    }
+    if (bookingLocation.coordinates.length !== 2) {
+      toast.error('Please pick your exact location on the map.')
+      return
+    }
+    const bookingTimeISO = new Date(`${bookingDate}T${bookingTime}`).toISOString()
+    bookingMutation.mutate({
+      serviceId: service._id,
+      title: details.title,
+      bookingTime: bookingTimeISO,
+      location: {
+        type: 'Point',
+        coordinates: bookingLocation.coordinates,
+        address: bookingLocation.address,
+      },
+      estimatedHours,
+      bookingType: details.serviceType,
+    })
   }
 
   return (
     <>
       <section className="bg-white py-14 sm:py-20">
         <div className="container mx-auto px-4">
-          <div className="relative mx-auto max-w-[1160px]">
+          <div className="mx-auto max-w-[1160px]">
             <Link
               href={`/services/${categoryId}`}
               aria-label="Back to services"
-              className="absolute left-0 top-1 grid size-9 place-items-center rounded-full border border-[#313131] transition hover:border-[#2877bb] hover:text-[#2877bb] sm:top-3"
+              className="inline-flex items-center gap-2 rounded-full border border-[#313131] px-4 py-2 text-sm font-medium transition hover:border-[#2877bb] hover:text-[#2877bb]"
             >
-              <ArrowLeft className="size-5" />
+              <ArrowLeft className="size-4" />
+              Back
             </Link>
-            <div className="px-12 text-center">
-              <h1 className="text-3xl font-bold text-[#343b40] sm:text-4xl">
+            <div className="mt-5 text-center">
+              <h1 className="text-2xl font-bold text-[#343b40] sm:text-4xl">
                 Service Details
               </h1>
               <p className="mt-3 text-sm text-[#667078] sm:text-base">
@@ -159,7 +228,7 @@ export function ServiceDetails({
 
           <article className="mx-auto mt-12 grid max-w-[1160px] gap-6 rounded-xl border border-[#8ebce8] p-3 lg:grid-cols-[390px_1fr]">
             <div className="grid grid-cols-3 gap-2">
-              <div className="relative col-span-3 h-[280px] overflow-hidden rounded-lg">
+              <div className="relative col-span-3 h-[240px] overflow-hidden rounded-lg sm:h-[280px]">
                 <Image
                   src={images[activeImage % images.length]}
                   alt={`${details.title} service`}
@@ -276,9 +345,14 @@ export function ServiceDetails({
       {modal === 'booking' && (
         <ModalShell label="Book service" onClose={() => setModal(null)}>
           <form onSubmit={submitBooking}>
-            <div className="rounded bg-gradient-to-r from-[#2e7bc1] to-[#9a684b] px-6 py-10 text-center text-white">
-              <p className="text-xl">Total amount</p>
-              <strong className="mt-1 block text-4xl">${total}</strong>
+            <div className="rounded bg-gradient-to-r from-[#2e7bc1] to-[#9a684b] px-4 py-8 text-center text-white sm:px-6 sm:py-10">
+              <p className="text-lg sm:text-xl">Total amount</p>
+              <strong className="mt-1 block text-3xl sm:text-4xl">${total.toFixed(2)}</strong>
+              <p className="mt-2 text-sm opacity-90">
+                {details.serviceType === 'hourly'
+                  ? `$${priceValue ?? 0}/hr × ${estimatedHours} hr`
+                  : `$${priceValue ?? 0}/session`}
+              </p>
             </div>
             <h2 className="mt-3 text-base font-medium">
               Select Booking Time &amp; Date
@@ -289,6 +363,8 @@ export function ServiceDetails({
                 <input
                   type="date"
                   required
+                  value={bookingDate}
+                  onChange={(event) => setBookingDate(event.target.value)}
                   className="bg-transparent outline-none"
                 />
               </label>
@@ -297,43 +373,44 @@ export function ServiceDetails({
                 <input
                   type="time"
                   required
+                  value={bookingTime}
+                  onChange={(event) => setBookingTime(event.target.value)}
                   className="bg-transparent outline-none"
                 />
               </label>
             </div>
-            <label className="mt-4 flex h-10 items-center gap-2 bg-[#edf8ff] px-3 text-sm">
-              <MapPin className="size-4" />
-              <input
-                required
-                placeholder="Set Your Location"
-                className="w-full bg-transparent outline-none"
-              />
+            <label className="mt-4 block text-sm font-medium">
+              Set Your Location
             </label>
-            <h3 className="mt-4 font-medium">Select Estimated</h3>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <label className="text-xs">
-                Hour
-                <select className="mt-2 h-10 w-full rounded bg-[#ff914d] px-4 text-center text-white">
-                  <option>1</option>
-                  <option>2</option>
-                  <option>3</option>
-                </select>
-              </label>
-              <label className="text-xs">
-                Time
-                <input
-                  type="time"
-                  required
+            <LocationPicker
+              value={bookingLocation}
+              onChange={setBookingLocation}
+            />
+            {details.serviceType === 'hourly' && (
+              <>
+                <h3 className="mt-4 font-medium">Select Estimated Hours</h3>
+                <select
+                  value={estimatedHours}
+                  onChange={(event) =>
+                    setEstimatedHours(Number(event.target.value))
+                  }
                   className="mt-2 h-10 w-full rounded bg-[#ff914d] px-4 text-center text-white"
-                />
-              </label>
-            </div>
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hour}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               <button
                 type="submit"
-                className="h-11 rounded-full bg-[#2d76b9] font-medium text-white"
+                disabled={bookingMutation.isPending}
+                className="h-11 rounded-full bg-[#2d76b9] font-medium text-white transition hover:bg-[#205f96] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Book Now
+                {bookingMutation.isPending ? 'Booking...' : 'Book Now'}
               </button>
               <button
                 type="button"
