@@ -1,6 +1,6 @@
 import { AppDownloadSection } from "@/components/landing/app-download-section";
 import { CategoriesGrid, CategoriesHero } from "@/components/landing/categories-content";
-import { FloatingChatButton } from "@/components/landing/floating-chat-button";
+// import { FloatingChatButton } from "@/components/landing/floating-chat-button";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { LandingFooter } from "@/components/landing/landing-footer";
@@ -18,7 +18,7 @@ export default function CategoriesPage() {
       <TestimonialsSection />
       <AppDownloadSection />
       <LandingFooter />
-      <FloatingChatButton />
+      {/* <FloatingChatButton /> */}
     </main>
   );
 }

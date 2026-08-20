@@ -23,8 +23,8 @@ export function ReviewModal({
   onClose,
   bookingId,
   serviceId,
-  providerName = "Madiha Lata",
-  providerAvatar = "/images/madiha.png",
+  providerName = "Service Provider",
+  providerAvatar = "/images/customer-rikan-bhart.jpg",
   onSubmitSuccess,
 }: ReviewModalProps) {
   const [rating, setRating] = useState<number>(0);
@@ -60,14 +60,14 @@ export function ReviewModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (rating === 0) {
-      toast.error("Please select a rating before submitting.");
+      toast.error("Please select a star rating before submitting.");
       return;
     }
     if (!bookingId || !serviceId) {
-      toast.error("Booking details are missing. Please try again.");
+      toast.error("Booking or service details missing. Cannot submit review.");
       return;
     }
-    mutation.mutate({ rating, message: reviewText });
+    mutation.mutate({ rating, message: reviewText.trim() });
   };
 
   return (
@@ -146,7 +146,7 @@ export function ReviewModal({
               <textarea
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
-                placeholder="Write a short review to help fellow books lovers..."
+                placeholder="Write a short review to describe your experience..."
                 className="w-full min-h-[100px] resize-none rounded-xl border border-gray-200 p-3.5 text-sm focus:border-[#2674b7] focus:outline-none focus:ring-1 focus:ring-[#2674b7] transition-all"
                 rows={3}
               />
@@ -155,9 +155,9 @@ export function ReviewModal({
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="w-full bg-[#2674b7] hover:bg-[#1d64a0] text-white font-medium py-3 rounded-xl transition-all shadow-md active:scale-[0.99] disabled:opacity-50 text-sm"
+              className="w-full bg-[#2674b7] hover:bg-[#1d64a0] text-white font-medium py-3 rounded-xl transition-all shadow-md active:scale-[0.99] disabled:opacity-50 text-sm flex items-center justify-center gap-2"
             >
-              {mutation.isPending ? "Submitting..." : "Submit"}
+              {mutation.isPending ? "Submitting..." : "Submit Review"}
             </button>
           </form>
         </div>

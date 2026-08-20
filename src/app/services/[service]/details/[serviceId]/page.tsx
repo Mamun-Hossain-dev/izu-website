@@ -1,4 +1,4 @@
-import { FloatingChatButton } from "@/components/landing/floating-chat-button";
+// import { FloatingChatButton } from "@/components/landing/floating-chat-button";
 import { LandingFooter } from "@/components/landing/landing-footer";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { ServiceDetails } from "@/components/landing/service-details";
@@ -13,7 +13,7 @@ export default function ServiceDetailsPage({
       <LandingHeader active="categories" />
       <ServiceDetails serviceId={params.serviceId} categoryId={params.service} />
       <LandingFooter />
-      <FloatingChatButton />
+      {/* <FloatingChatButton /> */}
     </main>
   );
 }

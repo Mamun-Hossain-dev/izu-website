@@ -83,7 +83,7 @@ export function SearchBox({ className = "" }: { className?: string }) {
       </div>
 
       {showDropdown ? (
-        <div className="absolute left-0 right-0 top-12 z-50 max-h-[70vh] overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+        <div className="absolute left-0 right-0 top-12 z-50 h-96 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
           {isFetching ? (
             <p className="px-4 py-6 text-center text-sm text-[#9aa3ad]">
               Searching...

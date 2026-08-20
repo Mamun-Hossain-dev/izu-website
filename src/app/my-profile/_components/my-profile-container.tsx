@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import ProfileSidebar from './profile-sidebar'
+import { API_BASE_URL } from '@/lib/axios'
+import { getAccessToken } from '@/store/auth-store'
 
 const inputClassName =
   'h-11 w-full rounded border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-[#2674b7] focus:ring-2 focus:ring-[#2674b7]/15'
@@ -23,17 +25,12 @@ type UpdateProfileInput = {
 }
 
 const profileQueryKey = ['profile'] as const
-const staticAccessToken =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhODE0MzRhY2M0OGVlODU2MGEwYjM2YSIsImlhdCI6MTc4Njg1NjI3OCwiZXhwIjoxNzg3NDYxMDc4fQ.TnbrIwpTFYJEsO5MoF-DrWMKo0DJXOIQgIoc8W9d2js'
-
-const getApiBaseUrl = () =>
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5008/api/v1'
 
 const fetchProfile = async (): Promise<Profile> => {
-  const response = await fetch(`${getApiBaseUrl()}/profile`, {
+  const response = await fetch(`${API_BASE_URL}/profile`, {
     credentials: 'include',
     headers: {
-      Authorization: `Bearer ${staticAccessToken}`,
+      Authorization: `Bearer ${getAccessToken()}`,
     },
   })
 
@@ -51,11 +48,11 @@ const updateProfile = async (fields: UpdateProfileInput): Promise<Profile> => {
   formData.append('email', fields.email)
   formData.append('phone', fields.phone)
 
-  const response = await fetch(`${getApiBaseUrl()}/profile`, {
+  const response = await fetch(`${API_BASE_URL}/profile`, {
     method: 'PATCH',
     credentials: 'include',
     headers: {
-      Authorization: `Bearer ${staticAccessToken}`,
+      Authorization: `Bearer ${getAccessToken()}`,
     },
     body: formData,
   })

@@ -5,6 +5,8 @@ import { FormEvent, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import ProfileSidebar from '../../my-profile/_components/profile-sidebar'
+import { API_BASE_URL } from '@/lib/axios'
+import { getAccessToken } from '@/store/auth-store'
 
 type PasswordFieldProps = {
   id: 'currentPassword' | 'newPassword' | 'confirmPassword'
@@ -61,18 +63,14 @@ type ChangePasswordInput = {
   confirmPassword: string
 }
 
-const staticAccessToken =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhODE0MzRhY2M0OGVlODU2MGEwYjM2YSIsImlhdCI6MTc4Njg1NjI3OCwiZXhwIjoxNzg3NDYxMDc4fQ.TnbrIwpTFYJEsO5MoF-DrWMKo0DJXOIQgIoc8W9d2js'
-
 const changePassword = async (values: ChangePasswordInput): Promise<string> => {
-  const apiBaseUrl =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5008/api/v1'
-  const response = await fetch(`${apiBaseUrl}/profile/change-password`, {
+  const accessToken = getAccessToken()
+  const response = await fetch(`${API_BASE_URL}/profile/change-password`, {
     method: 'PATCH',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${staticAccessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(values),
   })

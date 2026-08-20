@@ -1,6 +1,6 @@
 import { LandingHeader } from "@/components/landing/landing-header";
 import { LandingFooter } from "@/components/landing/landing-footer";
-import { FloatingChatButton } from "@/components/landing/floating-chat-button";
+// import { FloatingChatButton } from "@/components/landing/floating-chat-button";
 import { BookingContainer } from "@/components/bookings/booking-container";
 import { Metadata } from "next";
 
@@ -17,7 +17,7 @@ export default function BookingsPage() {
         <BookingContainer />
       </div>
       <LandingFooter />
-      <FloatingChatButton />
+      {/* <FloatingChatButton /> */}
     </main>
   );
 }

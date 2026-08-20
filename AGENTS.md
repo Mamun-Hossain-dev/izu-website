@@ -112,7 +112,7 @@ Frontend:
 
 ## Backend gotchas
 
-- `auth.controller.js` `changePassword` uses undefined `httpStatus` and `user.comparePassword` with password selected off — broken. Frontend change-password page calls `/profile/change-password` (PATCH) with a hardcoded static token.
+- `auth.controller.js` `changePassword` uses undefined `httpStatus` and `user.comparePassword` with password selected off — broken. Frontend change-password page calls `/profile/change-password` (PATCH).
 - `signup` returns user but does not set `isVerified` or send an OTP.
 
 ## Validation
