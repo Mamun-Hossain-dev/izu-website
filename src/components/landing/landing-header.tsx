@@ -15,14 +15,14 @@ const links = [
 export function LandingHeader({ active = 'home' }: { active?: string }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-16 bg-white shadow-sm">
-      <div className="container flex h-full items-center justify-between">
+      <div className="container flex h-full items-center justify-between gap-3">
         <Link href="/#home" aria-label="Workyapa home">
           <Image
             src="/images/workyapa-logo.png"
             alt="Workyapa"
             width={82}
             height={27}
-            className="h-auto w-[82px]"
+            className="h-auto w-[72px] sm:w-[82px]"
             priority
           />
         </Link>
@@ -62,7 +62,7 @@ export function LandingHeader({ active = 'home' }: { active?: string }) {
           <summary className="grid size-9 cursor-pointer list-none place-items-center rounded-md text-[#2674b7] [&::-webkit-details-marker]:hidden">
             <Menu />
           </summary>
-          <nav className="absolute right-0 top-12 flex w-64 max-h-[calc(100svh-4rem)] flex-col gap-2 overflow-y-auto rounded-lg border bg-white p-2 shadow-lg">
+          <nav className="absolute right-0 top-12 flex max-h-[calc(100svh-4rem)] w-[min(18rem,calc(100vw-2rem))] flex-col gap-2 overflow-y-auto rounded-lg border bg-white p-2 shadow-lg">
             <SearchBox className="w-full" />
             {links.map(link => (
               <Link

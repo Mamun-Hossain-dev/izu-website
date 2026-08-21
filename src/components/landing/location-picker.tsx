@@ -183,8 +183,8 @@ export function LocationPicker({
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-2">
-        <div className="flex h-10 flex-1 items-center gap-2 bg-[#edf8ff] px-3 text-sm">
+      <div className="flex flex-wrap gap-2 sm:flex-nowrap">
+        <div className="flex h-10 min-w-0 flex-[1_1_100%] items-center gap-2 bg-[#edf8ff] px-3 text-sm sm:flex-1">
           <MapPin className="size-4 shrink-0" />
           <input
             value={addressQuery}

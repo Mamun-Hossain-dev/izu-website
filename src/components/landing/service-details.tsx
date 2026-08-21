@@ -16,13 +16,13 @@ import { isAxiosError } from 'axios'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CatalogEmpty, CatalogError } from '@/components/landing/catalog-states'
 import { type PickedLocation } from '@/components/landing/location-picker'
+import { LocationPicker } from '@/components/landing/location-picker'
 import {
   ArrowLeft,
   Bookmark,
   CalendarDays,
   Check,
   Clock3,
-  LocateFixed,
   MapPin,
   MessageCircle,
   Navigation,
@@ -67,7 +67,7 @@ function ModalShell({
         role="dialog"
         aria-modal="true"
         aria-label={label}
-        className="my-auto w-full max-w-[590px] rounded-md bg-white p-5 shadow-2xl sm:p-6"
+        className="my-auto w-full max-w-[590px] rounded-md bg-white p-3 shadow-2xl sm:p-6"
         onMouseDown={event => event.stopPropagation()}
       >
         {children}
@@ -374,19 +374,16 @@ export function ServiceDetails({
                 </label>
               </div>
               
-              <div className="mt-4 flex h-[46px] items-center gap-3 rounded bg-[#f0f8ff] px-4 text-sm">
-                <LocateFixed className="size-[18px] text-[#64748b]" />
-                <input 
-                  value={bookingLocation.address}
-                  onChange={(e) => setBookingLocation({ coordinates: bookingLocation.coordinates, address: e.target.value })}
-                  placeholder="Set Your Location" 
-                  className="w-full bg-transparent outline-none text-[#475569] font-medium" 
+              <div className="mt-4">
+                <LocationPicker
+                  value={bookingLocation}
+                  onChange={setBookingLocation}
                 />
               </div>
 
               {details.serviceType === 'hourly' && (
-                <div className="mt-6 flex gap-4">
-                  <div className="flex-1">
+                <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+                  <div className="min-w-0 flex-1">
                     <h3 className="text-[15px] font-semibold text-[#101010] mb-3">Select Estimated<br/>Hour</h3>
                     <div className="relative">
                       <select
@@ -409,7 +406,7 @@ export function ServiceDetails({
                       </div>
                     </div>
                   </div>
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
                     <h3 className="text-[15px] font-semibold text-[#101010] mb-3"><br/>Time</h3>
                     <div className="flex h-[46px] items-center justify-center gap-2 rounded bg-[#f97316] px-4 text-white font-medium text-base">
                       <Clock3 className="size-[18px]" />
@@ -419,7 +416,7 @@ export function ServiceDetails({
                 </div>
               )}
 
-              <div className="mt-8 flex items-center gap-3">
+              <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <button
                   type="submit"
                   disabled={bookingMutation.isPending}

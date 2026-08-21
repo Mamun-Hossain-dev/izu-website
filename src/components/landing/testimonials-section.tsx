@@ -3,68 +3,96 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  getAllAndPopularServices,
+  type Review,
+} from "@/services/catalog-api";
+import { CatalogEmpty, CatalogError } from "@/components/landing/catalog-states";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const testimonials = [
-  {
-    name: "Rikan Bhart",
-    review: "Excellent roof repair service! The work was done professionally and on time. The team explained everything clearly and fixed the leak perfectly. Highly recommended.",
-  },
-  {
-    name: "Daniel Harper",
-    review: "The plumber arrived right on schedule and completed the repair quickly. Everything was clearly explained, the pricing was fair, and the workspace was left spotless.",
-  },
-  {
-    name: "Sophia Miller",
-    review: "Booking an electrician was simple and stress-free. The professional was friendly, experienced, and solved the issue safely in a single visit. Great service overall.",
-  },
-  {
-    name: "Michael Brown",
-    review: "Our cleaning service exceeded expectations. The team paid attention to every detail, worked efficiently, and made the whole house feel fresh and comfortable again.",
-  },
-  {
-    name: "Emma Wilson",
-    review: "A very reliable home-service platform. Communication was clear from booking through completion, and the technician delivered exactly what was promised.",
-  },
-  {
-    name: "Noah Anderson",
-    review: "The carpenter did a beautiful job repairing our cabinets. The finish looks professional, the work was completed on time, and the entire process was easy.",
-  },
-  {
-    name: "Olivia Taylor",
-    review: "Fast response, transparent pricing, and genuinely helpful support. The service provider was courteous and fixed our urgent plumbing problem without any hassle.",
-  },
-  {
-    name: "James Carter",
-    review: "I appreciated how easy it was to find and book a trusted professional. The technician arrived prepared, worked carefully, and delivered excellent results.",
-  },
-  {
-    name: "Ava Thompson",
-    review: "Professional service from beginning to end. The team kept me updated, respected my home, and completed the work to a very high standard. I would book again.",
-  },
-  {
-    name: "Ethan Walker",
-    review: "The booking process was quick and the service provider arrived exactly when expected. The repair was completed carefully, with clear updates throughout the visit.",
-  },
-  {
-    name: "Mia Robinson",
-    review: "I needed help at short notice and the team responded immediately. The professional was polite, knowledgeable, and completed everything without disrupting our day.",
-  },
-  {
-    name: "Lucas Martin",
-    review: "Excellent communication and dependable workmanship. The price matched the original estimate, the job was finished promptly, and the final result looks fantastic.",
-  },
-  {
-    name: "Isabella Clark",
-    review: "The entire experience was smooth and reassuring. It was easy to choose a service, schedule a convenient time, and follow the progress from start to finish.",
-  },
-  {
-    name: "Henry Lewis",
-    review: "A trustworthy and professional service. The technician diagnosed the issue quickly, explained the solution clearly, and made sure everything worked before leaving.",
-  },
-];
+function ReviewSectionHeader() {
+  return (
+    <div className="text-center">
+      <h2 className="text-4xl font-bold text-[#3e3029]">
+        What Our Clients Love About Us
+      </h2>
+      <p className="mt-2 text-lg text-[#6f625c]">
+        Discover how we help business succeed online.
+      </p>
+    </div>
+  );
+}
+
+function ReviewSkeleton() {
+  return (
+    <div className="mt-10 flex gap-6 overflow-hidden">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={index}
+          className="w-[245px] shrink-0 rounded-xl bg-white px-4 py-9 shadow-[1px_2px_4px_rgba(0,0,0,.15)] sm:w-[250px]"
+        >
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="mt-3 h-4 w-11/12" />
+          <Skeleton className="mt-3 h-4 w-3/4" />
+          <div className="mt-6 flex items-center gap-3">
+            <Skeleton className="size-[50px] rounded-full" />
+            <div className="flex-1">
+              <Skeleton className="h-5 w-28" />
+              <Skeleton className="mt-2 h-4 w-20" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function getApiTestimonials(
+  catalog: Record<string, { _id: string; reviews: Review[] }[]>
+) {
+  const services = Object.values(catalog).flat();
+  const uniqueServices = Array.from(
+    new Map(services.map((service) => [service._id, service])).values()
+  );
+
+  return uniqueServices
+    .flatMap((service) =>
+      (service.reviews || []).map((review, index) => {
+        const author =
+          typeof review.submittedBy === "object" ? review.submittedBy : undefined;
+        return {
+          id: review._id || `${service._id}-${review.createdAt || index}`,
+          name: author?.name || "Verified customer",
+          review: review.message?.trim() || "Great service experience.",
+          rating: review.rating,
+          avatar:
+            author?.profileImage?.includes("res.cloudinary.com")
+              ? author.profileImage
+              : "/images/customer-rikan-bhart.jpg",
+          createdAt: review.createdAt ? new Date(review.createdAt).getTime() : 0,
+        };
+      })
+    )
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .map((testimonial) => ({
+      id: testimonial.id,
+      name: testimonial.name,
+      review: testimonial.review,
+      rating: testimonial.rating,
+      avatar: testimonial.avatar,
+    }));
+}
 
 export function TestimonialsSection() {
   const track = useRef<HTMLDivElement>(null);
+  const { data: catalog, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["services-catalog"],
+    queryFn: getAllAndPopularServices,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const apiTestimonials = catalog ? getApiTestimonials(catalog) : [];
 
   function scroll(direction: number) {
     track.current?.scrollBy({ left: direction * 270, behavior: "smooth" });
@@ -73,10 +101,23 @@ export function TestimonialsSection() {
   return (
     <section className="bg-[#f8f8f8] py-16 sm:py-20">
       <div className="container">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-[#3e3029]">What Our Clients Love About Us</h2>
-          <p className="mt-2 text-lg text-[#6f625c]">Discover how we help business succeed online.</p>
-        </div>
+        <ReviewSectionHeader />
+
+        {isLoading ? <ReviewSkeleton /> : null}
+
+        {isError ? (
+          <CatalogError error={error} onRetry={() => void refetch()} />
+        ) : null}
+
+        {!isLoading && !isError && !apiTestimonials.length ? (
+          <CatalogEmpty
+            title="No reviews found"
+            description="There are no customer reviews available yet."
+          />
+        ) : null}
+
+        {!isLoading && !isError && apiTestimonials.length ? (
+          <>
         <div className="mt-6 flex justify-end gap-4">
           <button onClick={() => scroll(-1)} aria-label="Previous testimonial" className="grid size-8 place-items-center rounded-full bg-white text-[#777] shadow-md hover:text-[#2877bb]">
             <ChevronLeft className="size-5" />
@@ -86,19 +127,23 @@ export function TestimonialsSection() {
           </button>
         </div>
         <div ref={track} className="mt-4 flex snap-x gap-6 overflow-x-auto pb-2 scroll-px-4 sm:scroll-px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {testimonials.map((testimonial) => (
-            <article key={testimonial.name} className="w-[245px] shrink-0 snap-start rounded-xl bg-white px-4 py-9 shadow-[1px_2px_4px_rgba(0,0,0,.25)] sm:w-[250px]">
+          {apiTestimonials.map((testimonial) => (
+            <article key={testimonial.id} className="w-[245px] shrink-0 snap-start rounded-xl bg-white px-4 py-9 shadow-[1px_2px_4px_rgba(0,0,0,.25)] sm:w-[250px]">
               <p className="text-[15px] leading-[1.55] text-[#746b66]">{testimonial.review}</p>
               <div className="mt-5 flex items-center gap-3">
-                <Image src="/images/customer-rikan-bhart.jpg" alt={testimonial.name} width={50} height={50} className="size-[50px] rounded-full object-cover" />
+                <Image src={testimonial.avatar} alt={testimonial.name} width={50} height={50} className="size-[50px] rounded-full object-cover" />
                 <div>
                   <h3 className="text-lg font-bold text-[#43352f]">{testimonial.name}</h3>
-                  <div className="mt-1 tracking-[2px] text-[#ffd400]" aria-label="5 out of 5 stars">★★★★★</div>
+                  <div className="mt-1 tracking-[2px] text-[#ffd400]" aria-label={`${testimonial.rating} out of 5 stars`}>
+                    {"★".repeat(Math.max(0, Math.min(5, testimonial.rating)))}
+                  </div>
                 </div>
               </div>
             </article>
           ))}
         </div>
+          </>
+        ) : null}
       </div>
     </section>
   );

@@ -38,7 +38,8 @@ export function ServicesSection() {
     if (!el) return;
 
     const handleScroll = () => {
-      const itemWidth = 356; // 340px width + 16px gap
+      const itemWidth =
+        (el.firstElementChild?.getBoundingClientRect().width || 340) + 16;
       const index = Math.round(el.scrollLeft / itemWidth);
       setActiveIndex(index);
     };
@@ -49,7 +50,8 @@ export function ServicesSection() {
 
   const scrollToDot = (index: number) => {
     if (!track.current) return;
-    const itemWidth = 356;
+    const itemWidth =
+      (track.current.firstElementChild?.getBoundingClientRect().width || 340) + 16;
     track.current.scrollTo({
       left: index * itemWidth,
       behavior: "smooth",
@@ -66,8 +68,8 @@ export function ServicesSection() {
   return (
     <section id="services" className="relative scroll-mt-20 bg-white py-12 sm:py-14">
       <div className="container text-center">
-        <h2 className="text-4xl font-bold text-[#343b40]">Services</h2>
-        <p className="mt-2 text-base text-[#667078]">
+        <h2 className="text-3xl font-bold text-[#343b40] sm:text-4xl">Services</h2>
+        <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-[#667078] sm:text-base">
           We provide modern, reliable, and scalable digital solutions to help businesses grow faster online.
         </p>
       </div>
@@ -84,13 +86,13 @@ export function ServicesSection() {
       ) : (
         <div
           ref={track}
-          className="container mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="container mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-8"
         >
           {data.map((category) => (
             <Link
               key={category._id}
               href={`/services/${category._id}`}
-              className="group w-[290px] shrink-0 snap-start overflow-hidden rounded-xl bg-[#f1f1f1] transition-transform duration-300 hover:-translate-y-1 sm:w-[340px]"
+              className="group w-[calc(100vw-2rem)] max-w-[340px] shrink-0 snap-start overflow-hidden rounded-xl bg-[#f1f1f1] transition-transform duration-300 hover:-translate-y-1 sm:w-[340px]"
             >
               <div className="relative h-[220px] sm:h-[250px]">
                 <Image

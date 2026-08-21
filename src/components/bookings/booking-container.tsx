@@ -250,7 +250,7 @@ export function BookingContainer() {
         </p>
       </div>
 
-      <div className="flex items-center justify-center gap-3 sm:gap-4 mb-8 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex items-center justify-start gap-2 overflow-x-auto pb-2 scrollbar-none sm:justify-center sm:gap-4">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
@@ -259,7 +259,7 @@ export function BookingContainer() {
               onClick={() => setActiveTab(tab.key)}
               className={`px-4 sm:px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border whitespace-nowrap ${
                 isActive
-                  ? "bg-[#2674b7] text-white border-[#2674b7] shadow-sm"
+                ? "bg-[#2674b7] text-white border-[#2674b7] shadow-sm"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400"
               }`}
             >
