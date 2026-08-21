@@ -25,13 +25,13 @@ export function TrustAndAchievements({ showAchievements = true }: { showAchievem
       <section className="bg-[#f8f8f8] py-14 sm:py-16">
         <div className="container">
           <div className="text-center">
-            <h2 className="text-4xl font-bold">Why Trust Us</h2>
-            <p className="mt-2 text-lg text-[#666]">Easy Booking Process for Hassle-Free Home Services</p>
+            <h2 className="text-3xl font-bold sm:text-4xl">Why Trust Us</h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-[#666] sm:text-lg">Easy Booking Process for Hassle-Free Home Services</p>
           </div>
           <div className="mt-10 grid items-center gap-10 lg:grid-cols-[1.05fr_.95fr] lg:gap-20">
             <div className="text-base leading-[1.6] text-[#626262]">
               <h3 className="mb-4 text-xl font-bold text-black">Experience you can rely on</h3>
-              <p className="text-justify">
+              <p className="text-left sm:text-justify">
                 We are committed to delivering reliable, professional, and high-quality home services designed to make your everyday life easier. From skilled experts to fast response times, we focus on providing safe, affordable, and customer-friendly solutions you can trust. Our goal is to ensure comfort, convenience, and complete satisfaction with every service we provide.
               </p>
               <p>What Makes Us Different</p>
@@ -47,7 +47,7 @@ export function TrustAndAchievements({ showAchievements = true }: { showAchievem
       </section>
 
       {showAchievements && (
-        <section className="relative mx-auto aspect-[1922/363] min-h-[300px] max-h-[363px] max-w-[1922px] overflow-hidden text-white">
+        <section className="relative mx-auto min-h-[360px] max-h-[430px] max-w-[1922px] overflow-hidden py-10 text-white sm:aspect-[1922/363] sm:min-h-[300px] sm:max-h-[363px] sm:py-0">
           <Image src="/images/achivements.jpg" alt="" fill sizes="100vw" className="object-cover" />
           <div className="absolute inset-0 bg-[#62b6ed]/40" />
           <div className="container relative grid h-full grid-cols-2 items-center gap-6 text-center sm:gap-8 md:grid-cols-4">

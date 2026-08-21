@@ -1,17 +1,13 @@
+import { API_BASE_URL } from "@/lib/axios";
+import { getAccessToken } from "@/store/auth-store";
 import type { Chat, ChatMessage, ChatsResponse } from "./message-types";
 
-const staticAccessToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhODE0MzRhY2M0OGVlODU2MGEwYjM2YSIsImlhdCI6MTc4Njg1NjI3OCwiZXhwIjoxNzg3NDYxMDc4fQ.TnbrIwpTFYJEsO5MoF-DrWMKo0DJXOIQgIoc8W9d2js";
-
-const getApiBaseUrl = () =>
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5008/api/v1";
-
 const apiRequest = async <T>(path: string, init?: RequestInit): Promise<T> => {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include",
     ...init,
     headers: {
-      Authorization: `Bearer ${staticAccessToken}`,
+      Authorization: `Bearer ${getAccessToken()}`,
       ...init?.headers,
     },
   });

@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/axios";
 import { useAuthStore } from "@/store/auth-store";
 
 type UserMenuProps = {
@@ -10,11 +11,8 @@ type UserMenuProps = {
 
 const FALLBACK_AVATAR = "/images/customer-rikan-bhart.jpg";
 
-const getApiBaseUrl = () =>
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5008/api/v1";
-
 const fetchProfile = async (accessToken: string) => {
-  const response = await fetch(`${getApiBaseUrl()}/profile`, {
+  const response = await fetch(`${API_BASE_URL}/profile`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,

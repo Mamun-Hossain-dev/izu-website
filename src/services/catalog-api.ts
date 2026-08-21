@@ -26,8 +26,17 @@ export type Provider = {
 };
 
 export type Review = {
+  _id?: string;
   rating: number;
   message?: string;
+  createdAt?: string;
+  submittedBy?:
+    | string
+    | {
+        _id?: string;
+        name?: string;
+        profileImage?: string;
+      };
 };
 
 export type Service = {
@@ -52,6 +61,8 @@ export type SearchResults = {
   services: Service[];
 };
 
+export type ServicesCatalog = Record<string, Service[]>;
+
 export const searchCatalog = async (q: string): Promise<SearchResults> => {
   const { data } = await axiosInstance.get<ApiResponse<SearchResults>>(
     "/search",
@@ -74,6 +85,13 @@ export const getCategoryWiseServices = async (categoryId: string): Promise<Servi
 
 export const getServiceById = async (serviceId: string): Promise<Service> => {
   const { data } = await axiosInstance.get<ApiResponse<Service>>(`/services/${serviceId}`);
+  return data.data;
+};
+
+export const getAllAndPopularServices = async (): Promise<ServicesCatalog> => {
+  const { data } = await axiosInstance.get<ApiResponse<ServicesCatalog>>(
+    "/services"
+  );
   return data.data;
 };
 

@@ -21,7 +21,7 @@ const categoryLinks = [
 export function LandingFooter() {
   return (
     <footer id="contact" className="scroll-mt-20 bg-[#0d78b8] text-white">
-      <div className="mx-auto max-w-[1500px] px-6 py-10 sm:px-10 lg:px-20">
+      <div className="mx-auto max-w-[1500px] px-5 py-10 sm:px-10 lg:px-20">
         <div className="grid gap-10 lg:grid-cols-[1.25fr_1fr_1fr_1.25fr] lg:items-start">
           <div className="flex items-center justify-center lg:justify-start">
             <Image

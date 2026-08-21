@@ -15,10 +15,8 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CatalogEmpty, CatalogError } from '@/components/landing/catalog-states'
-import {
-  LocationPicker,
-  type PickedLocation,
-} from '@/components/landing/location-picker'
+import { type PickedLocation } from '@/components/landing/location-picker'
+import { LocationPicker } from '@/components/landing/location-picker'
 import {
   ArrowLeft,
   Bookmark,
@@ -69,7 +67,7 @@ function ModalShell({
         role="dialog"
         aria-modal="true"
         aria-label={label}
-        className="my-auto w-full max-w-[590px] rounded-md bg-white p-5 shadow-2xl sm:p-6"
+        className="my-auto w-full max-w-[590px] rounded-md bg-white p-3 shadow-2xl sm:p-6"
         onMouseDown={event => event.stopPropagation()}
       >
         {children}
@@ -345,80 +343,95 @@ export function ServiceDetails({
       {modal === 'booking' && (
         <ModalShell label="Book service" onClose={() => setModal(null)}>
           <form onSubmit={submitBooking}>
-            <div className="rounded bg-gradient-to-r from-[#2e7bc1] to-[#9a684b] px-4 py-8 text-center text-white sm:px-6 sm:py-10">
-              <p className="text-lg sm:text-xl">Total amount</p>
-              <strong className="mt-1 block text-3xl sm:text-4xl">${total.toFixed(2)}</strong>
-              <p className="mt-2 text-sm opacity-90">
-                {details.serviceType === 'hourly'
-                  ? `$${priceValue ?? 0}/hr × ${estimatedHours} hr`
-                  : `$${priceValue ?? 0}/session`}
-              </p>
+            <div className="rounded-[20px] bg-gradient-to-r from-[#215d94] to-[#6d5b53] px-4 py-10 text-center text-white sm:px-6 sm:py-12 relative overflow-hidden">
+              <p className="text-base font-medium opacity-90">Total amount</p>
+              <strong className="mt-1 block text-4xl sm:text-5xl font-bold">${total.toFixed(0)}</strong>
             </div>
-            <h2 className="mt-3 text-base font-medium">
-              Select Booking Time &amp; Date
-            </h2>
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-              <label className="flex items-center gap-2 rounded-full border border-[#ff914d] px-3 py-2 text-xs">
-                <CalendarDays className="size-4" />
-                <input
-                  type="date"
-                  required
-                  value={bookingDate}
-                  onChange={(event) => setBookingDate(event.target.value)}
-                  className="bg-transparent outline-none"
+            <div className="p-1 sm:p-2">
+              <h2 className="mt-6 text-[15px] font-semibold text-[#101010]">
+                Select Booking Time &amp; Date
+              </h2>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <label className="flex h-[46px] flex-1 items-center gap-3 rounded-full border border-[#f97316] px-4 text-sm text-[#475569]">
+                  <CalendarDays className="size-[18px] text-[#f97316]" />
+                  <input
+                    type="date"
+                    required
+                    value={bookingDate}
+                    onChange={(event) => setBookingDate(event.target.value)}
+                    className="w-full bg-transparent outline-none focus:outline-none font-medium"
+                  />
+                </label>
+                <label className="flex h-[46px] flex-1 items-center gap-3 rounded-full border border-[#f97316] px-4 text-sm text-[#475569]">
+                  <Clock3 className="size-[18px] text-[#f97316]" />
+                  <input
+                    type="time"
+                    required
+                    value={bookingTime}
+                    onChange={(event) => setBookingTime(event.target.value)}
+                    className="w-full bg-transparent outline-none focus:outline-none font-medium"
+                  />
+                </label>
+              </div>
+              
+              <div className="mt-4">
+                <LocationPicker
+                  value={bookingLocation}
+                  onChange={setBookingLocation}
                 />
-              </label>
-              <label className="flex items-center gap-2 rounded-full border border-[#ff914d] px-3 py-2 text-xs">
-                <Clock3 className="size-4" />
-                <input
-                  type="time"
-                  required
-                  value={bookingTime}
-                  onChange={(event) => setBookingTime(event.target.value)}
-                  className="bg-transparent outline-none"
-                />
-              </label>
-            </div>
-            <label className="mt-4 block text-sm font-medium">
-              Set Your Location
-            </label>
-            <LocationPicker
-              value={bookingLocation}
-              onChange={setBookingLocation}
-            />
-            {details.serviceType === 'hourly' && (
-              <>
-                <h3 className="mt-4 font-medium">Select Estimated Hours</h3>
-                <select
-                  value={estimatedHours}
-                  onChange={(event) =>
-                    setEstimatedHours(Number(event.target.value))
-                  }
-                  className="mt-2 h-10 w-full rounded bg-[#ff914d] px-4 text-center text-white"
+              </div>
+
+              {details.serviceType === 'hourly' && (
+                <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-[15px] font-semibold text-[#101010] mb-3">Select Estimated<br/>Hour</h3>
+                    <div className="relative">
+                      <select
+                        value={estimatedHours}
+                        onChange={(event) =>
+                          setEstimatedHours(Number(event.target.value))
+                        }
+                        className="h-[46px] w-full appearance-none rounded bg-[#f97316] px-4 text-white outline-none font-medium text-base"
+                      >
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map((hour) => (
+                          <option key={hour} value={hour}>
+                            {hour}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1 1.5L6 6.5L11 1.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-[15px] font-semibold text-[#101010] mb-3"><br/>Time</h3>
+                    <div className="flex h-[46px] items-center justify-center gap-2 rounded bg-[#f97316] px-4 text-white font-medium text-base">
+                      <Clock3 className="size-[18px]" />
+                      <span>{bookingTime || "11:00 A.M"}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+                <button
+                  type="submit"
+                  disabled={bookingMutation.isPending}
+                  className="flex-1 h-[48px] rounded-full bg-[#2d76b9] font-semibold text-white transition hover:bg-[#205f96] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((hour) => (
-                    <option key={hour} value={hour}>
-                      {hour}
-                    </option>
-                  ))}
-                </select>
-              </>
-            )}
-            <div className="mt-5 grid gap-2 sm:grid-cols-2">
-              <button
-                type="submit"
-                disabled={bookingMutation.isPending}
-                className="h-11 rounded-full bg-[#2d76b9] font-medium text-white transition hover:bg-[#205f96] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {bookingMutation.isPending ? 'Booking...' : 'Book Now'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setModal(null)}
-                className="h-11 rounded-full border border-[#ff914d] font-medium"
-              >
-                Cancel Booking
-              </button>
+                  {bookingMutation.isPending ? 'Booking...' : 'Book Now'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModal(null)}
+                  className="flex-1 h-[48px] rounded-full border border-[#f97316] font-semibold text-[#101010] bg-white transition hover:bg-orange-50"
+                >
+                  Cancel Booking
+                </button>
+              </div>
             </div>
           </form>
         </ModalShell>

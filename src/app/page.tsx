@@ -1,5 +1,5 @@
 import { AppDownloadSection } from "@/components/landing/app-download-section";
-import { FloatingChatButton } from "@/components/landing/floating-chat-button";
+// import { FloatingChatButton } from "@/components/landing/floating-chat-button";
 import { HeroSection } from "@/components/landing/hero-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingHeader } from "@/components/landing/landing-header";
@@ -19,7 +19,7 @@ export default function HomePage() {
       <TestimonialsSection />
       <AppDownloadSection />
       <LandingFooter />
-      <FloatingChatButton />
+      {/* <FloatingChatButton /> */}
     </main>
   );
 }

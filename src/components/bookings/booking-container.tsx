@@ -5,6 +5,8 @@ import { BookingCard, BookingItem, BookingStatus } from "./booking-card";
 import { ReviewModal } from "./review-modal";
 import { RescheduleModal } from "./reschedule-modal";
 import { LocationModal } from "./location-modal";
+import { ConfirmCompletionModal } from "./confirm-completion-modal";
+import { PaymentModal } from "./payment-modal";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -71,7 +73,12 @@ function toBookingItem(booking: Booking, tab: BookingStatus): BookingItem {
     startTime:
       booking.acceptStartServiceTime ||
       (booking.status === "ongoing" ? booking.bookingTime : undefined),
-    serviceId: booking.serviceId?._id,
+    serviceId:
+      typeof booking.serviceId === "object" && booking.serviceId
+        ? booking.serviceId._id
+        : typeof booking.serviceId === "string"
+          ? booking.serviceId
+          : undefined,
     serviceTitle:
       booking.serviceId?.serviceDetails?.title || booking.title || "",
     categoryId:
@@ -119,6 +126,8 @@ export function BookingContainer() {
   const [locationBooking, setLocationBooking] = useState<BookingItem | null>(
     null
   );
+  const [confirmCompletionItem, setConfirmCompletionItem] = useState<BookingItem | null>(null);
+  const [paymentItem, setPaymentItem] = useState<BookingItem | null>(null);
 
   const enabled = !!user;
   const liveQuery = useQuery({
@@ -178,7 +187,15 @@ export function BookingContainer() {
   const confirmCompletionMutation = useMutation({
     mutationFn: (bookingId: string) => confirmCompletionRequest(bookingId),
     onSuccess: (result) => {
-      toast.success(result.message || "Booking marked as completed.");
+      // Find the completed booking to open the review modal
+      const completedBooking = paymentItem || confirmCompletionItem;
+      setPaymentItem(null);
+      setConfirmCompletionItem(null);
+      if (completedBooking) {
+        setReviewBooking(completedBooking);
+      } else {
+        toast.success(result.message || "Booking marked as completed.");
+      }
       invalidateBookings();
     },
     onError: (error) =>
@@ -233,7 +250,7 @@ export function BookingContainer() {
         </p>
       </div>
 
-      <div className="flex items-center justify-center gap-3 sm:gap-4 mb-8 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex items-center justify-start gap-2 overflow-x-auto pb-2 scrollbar-none sm:justify-center sm:gap-4">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
@@ -242,7 +259,7 @@ export function BookingContainer() {
               onClick={() => setActiveTab(tab.key)}
               className={`px-4 sm:px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border whitespace-nowrap ${
                 isActive
-                  ? "bg-[#2674b7] text-white border-[#2674b7] shadow-sm"
+                ? "bg-[#2674b7] text-white border-[#2674b7] shadow-sm"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400"
               }`}
             >
@@ -279,9 +296,7 @@ export function BookingContainer() {
               onCancelBooking={(item) => cancelMutation.mutate(item.id)}
               onOpenReview={(item) => setReviewBooking(item)}
               onConfirmStart={(item) => confirmStartMutation.mutate(item.id)}
-              onConfirmCompletion={(item) =>
-                confirmCompletionMutation.mutate(item.id)
-              }
+              onConfirmCompletion={(item) => setConfirmCompletionItem(item)}
               onRebook={handleRebook}
             />
           ))
@@ -318,6 +333,29 @@ export function BookingContainer() {
         onClose={() => setLocationBooking(null)}
         address={locationBooking?.address}
         providerName={locationBooking?.providerName}
+      />
+
+      <ConfirmCompletionModal
+        isOpen={!!confirmCompletionItem}
+        onClose={() => setConfirmCompletionItem(null)}
+        onConfirm={() => {
+          setPaymentItem(confirmCompletionItem);
+          setConfirmCompletionItem(null);
+        }}
+        providerName={confirmCompletionItem?.providerName}
+        providerAvatar={confirmCompletionItem?.providerAvatar}
+      />
+
+      <PaymentModal
+        isOpen={!!paymentItem}
+        onClose={() => setPaymentItem(null)}
+        onPayNow={() => {
+          if (paymentItem) {
+            confirmCompletionMutation.mutate(paymentItem.id);
+          }
+        }}
+        amount={paymentItem?.amount || "$0"}
+        isProcessing={confirmCompletionMutation.isPending}
       />
     </div>
   );

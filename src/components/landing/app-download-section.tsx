@@ -25,13 +25,13 @@ export function AppDownloadSection() {
     <section className="bg-[#eff8ff] py-12 sm:py-16">
       <div className="mx-auto grid max-w-[800px] items-center gap-10 px-5 md:grid-cols-[1fr_250px] md:gap-20">
         <div>
-          <h2 className="text-4xl font-extrabold leading-[1.4] sm:text-[40px]">
+          <h2 className="text-3xl font-extrabold leading-[1.25] sm:text-[40px] sm:leading-[1.4]">
             Reliable Home Services at<br className="hidden sm:block" /> Your Doorstep
           </h2>
-          <p className="mt-5 max-w-[540px] text-lg leading-6 text-[#74665e]">
+          <p className="mt-5 max-w-[540px] text-base leading-6 text-[#74665e] sm:text-lg">
             Book skilled plumbers and cleaning experts in minutes and manage all your home services from one convenient platform
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <StoreButton store="App Store" />
             <StoreButton store="Google Play" />
           </div>
