@@ -87,7 +87,7 @@ export function LandingFooter() {
         </div>
 
         <div className="mt-8 border-t border-white/60 pt-6 text-center text-sm text-white/90 sm:text-base">
-          <span>© 2025 workyapa. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} workyapa. All rights reserved.</span>
         </div>
       </div>
     </footer>

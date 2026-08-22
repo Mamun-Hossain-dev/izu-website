@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -10,6 +11,44 @@ import type { ChatMessage } from "./message-types";
 
 const chatsQueryKey = ["chats"] as const;
 const messagesQueryKey = (chatId: string) => ["messages", chatId] as const;
+
+function MessageSkeleton() {
+  return (
+    <div
+      aria-label="Loading conversations"
+      aria-busy="true"
+      className="flex h-[calc(100svh-12rem)] min-h-[520px] flex-col overflow-hidden rounded-md bg-white sm:h-[700px] lg:grid lg:h-[680px] lg:grid-cols-[320px_minmax(0,1fr)]"
+    >
+      <aside className="border-r border-slate-100 p-4">
+        <Skeleton className="h-10 w-full rounded-md" />
+        <div className="mt-5 space-y-4">
+          {Array.from({ length: 6 }, (_, index) => (
+            <div key={index} className="flex items-center gap-3">
+              <Skeleton className="size-11 shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/5" />
+                <Skeleton className="h-3 w-4/5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </aside>
+
+      <section className="hidden min-h-0 flex-col bg-[#f8f9fa] lg:flex">
+        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-slate-100 bg-white px-4">
+          <Skeleton className="size-8 rounded-full" />
+          <div className="space-y-1.5"><Skeleton className="h-3.5 w-28" /><Skeleton className="h-2.5 w-16" /></div>
+        </header>
+        <div className="flex-1 space-y-4 p-4">
+          <Skeleton className="h-12 w-2/5 rounded-lg" />
+          <Skeleton className="ml-auto h-16 w-1/2 rounded-lg" />
+          <Skeleton className="h-12 w-1/3 rounded-lg" />
+        </div>
+        <div className="border-t border-slate-100 bg-white p-3"><Skeleton className="h-10 w-full rounded-md" /></div>
+      </section>
+    </div>
+  );
+}
 
 const MessageContainer = () => {
   const queryClient = useQueryClient();
@@ -72,7 +111,7 @@ const MessageContainer = () => {
 
         <div className="overflow-hidden rounded-lg bg-[#dceeff] p-2 shadow-sm sm:p-5">
           {isChatsLoading ? (
-            <div className="grid min-h-[460px] place-items-center rounded-md bg-white text-sm text-slate-500">Loading conversations…</div>
+            <MessageSkeleton />
           ) : isChatsError ? (
             <div className="grid min-h-[460px] place-items-center rounded-md bg-white p-6 text-center text-sm text-rose-600">Could not load conversations. Please refresh and try again.</div>
           ) : !chats.length ? (

@@ -1,4 +1,4 @@
-import { Camera, FileText, Paperclip, Send, X } from "lucide-react";
+import { FileText, Paperclip, Send, X } from "lucide-react";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 
 type MessageComposerProps = {
@@ -84,7 +84,6 @@ export function MessageComposer({ onSend, isSending }: MessageComposerProps) {
         <button type="button" onClick={() => fileInputRef.current?.click()} aria-label="Attach files" className="grid size-9 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-sky-50 hover:text-[#2674b7]"><Paperclip className="size-5" /></button>
         <input value={content} onChange={(event) => setContent(event.target.value)} placeholder="Write your message..." aria-label="Message" className="h-10 min-w-0 flex-1 rounded-md border border-[#2674b7] px-3 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#2674b7]/20" />
         <button type="submit" disabled={isSending || (!content.trim() && !attachments.length)} aria-label="Send message" className="grid size-10 shrink-0 place-items-center rounded-full bg-[#2674b7] text-white transition hover:bg-[#205f96] disabled:cursor-not-allowed disabled:opacity-50"><Send className="size-4" /></button>
-        <Camera className="hidden size-5 text-slate-500 sm:block" aria-hidden="true" />
       </div>
     </form>
   );
