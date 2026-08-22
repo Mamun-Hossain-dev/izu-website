@@ -136,6 +136,7 @@ const ContactUsContainer = () => {
                 name="address"
                 type="text"
                 autoComplete="street-address"
+                placeholder="Enter your address"
                 className={fieldClassName}
                 value={values.address}
                 onChange={(event) => update("address", event.target.value)}
@@ -151,7 +152,7 @@ const ContactUsContainer = () => {
                 name="phoneNumber"
                 type="tel"
                 autoComplete="tel"
-                placeholder="Optional"
+                placeholder="Enter your phone number"
                 className={fieldClassName}
                 value={values.phoneNumber}
                 onChange={(event) => update("phoneNumber", event.target.value)}
