@@ -1,4 +1,4 @@
-import { ChevronLeft, Phone } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { ChatAvatar } from "./chat-avatar";
 import { MessageBubble } from "./message-bubble";
@@ -46,7 +46,6 @@ export function ConversationPanel({ chat, messages, isLoading, isError, onSend, 
         ) : null}
         <ChatAvatar name={chat.title || "Conversation"} imageUrl={chat.imageUrl} className="size-8" />
         <div className="min-w-0 flex-1"><h2 className="truncate text-sm font-semibold text-slate-800">{chat.title || "Conversation"}</h2><p className="text-[10px] text-slate-500">Conversation</p></div>
-        <Phone className="size-4 text-slate-700" aria-label="Call unavailable" />
       </header>
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
         {isLoading && <p className="py-8 text-center text-sm text-slate-500">Loading messages…</p>}
