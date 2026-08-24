@@ -349,13 +349,11 @@ export function BookingContainer() {
       <PaymentModal
         isOpen={!!paymentItem}
         onClose={() => setPaymentItem(null)}
-        onPayNow={() => {
-          if (paymentItem) {
-            confirmCompletionMutation.mutate(paymentItem.id);
-          }
+        bookingId={paymentItem?.id}
+        onPaymentSuccess={() => {
+          if (paymentItem) confirmCompletionMutation.mutate(paymentItem.id);
         }}
         amount={paymentItem?.amount || "$0"}
-        isProcessing={confirmCompletionMutation.isPending}
       />
     </div>
   );
